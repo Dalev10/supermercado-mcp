@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Chatbot de pedidos de supermercado sobre un servidor MCP. La especificación completa es `GUIA_DESARROLLO.md`; este archivo resume lo que aplica en todo momento.
+Chatbot de pedidos de supermercado sobre un servidor MCP. La especificación completa es `GUIA_DESARROLLO.md`, un archivo local que no se versiona; este archivo resume lo que aplica en todo momento.
 
 ## Al retomar una sesión
 

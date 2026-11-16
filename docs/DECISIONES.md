@@ -1,6 +1,6 @@
 # Registro de decisiones
 
-Cada decisión del proyecto queda aquí con sus opciones, la recomendación de Claude Code, lo que eligió el estudiante y el porqué. El formato sigue el Anexo B de `GUIA_DESARROLLO.md`.
+Cada decisión del proyecto queda aquí con sus opciones, la recomendación de Claude Code, lo que eligió el estudiante y el porqué. El formato sigue el Anexo B de la guía de desarrollo del proyecto (`GUIA_DESARROLLO.md`, archivo local que no se versiona).
 
 ## Decisiones tomadas antes de empezar (sección 2 de la guía)
 
@@ -215,3 +215,12 @@ Cada decisión del proyecto queda aquí con sus opciones, la recomendación de C
 - **Decisión del estudiante:** a
 - **Justificación:** da variedad suficiente para las demostraciones y capturas e incluye casos para probar validaciones.
 - **Consecuencias:** 32 productos genéricos (sin marcas) con precios verosímiles en COP: 2 agotados, 3 con stock de 3 unidades o menos y 1 inactivo. Dos clientes ficticios, uno con el teléfono 3001234567 del guion de prueba. Todos los datos son sintéticos.
+
+### D2.9 Guía de desarrollo fuera del repositorio (no prevista en la guía)
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) mantener `GUIA_DESARROLLO.md` versionado, como indica la estructura de la guía; b) dejar de versionarlo e incluirlo en `.gitignore`
+- **Recomendación de Claude Code:** no se consultó; fue una instrucción directa del estudiante al confirmar el push de la Fase 2
+- **Decisión del estudiante:** b
+- **Justificación:** es un documento de trabajo interno, no parte del producto que se entrega.
+- **Consecuencias:** el archivo se conserva en la máquina local y deja de aparecer en el repositorio desde la rama `fase-2-base-de-datos`. Sigue existiendo en el historial (commit inicial de `main`); borrarlo también de ahí exige reescribir el historial y un `git push --force`, que requieren confirmación explícita.
