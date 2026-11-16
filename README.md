@@ -267,7 +267,9 @@ Si instalaste Node con nvm, la app no lo encuentra en su `PATH`: usa rutas absol
 
 ### 7.5 Con Claude Code
 
-El repositorio incluye [`.mcp.json`](.mcp.json): al abrir la carpeta con Claude Code, este ofrece conectar el servidor `supermercado-mcp` (hay que aprobarlo una vez). Comprobación: `claude mcp list`.
+El repositorio incluye [`.mcp.json`](.mcp.json). Ejecuta `claude` en la carpeta del proyecto y aprueba el servidor `supermercado-mcp` cuando lo pregunte (solo la primera vez). Comprobación: `claude mcp list` debe mostrar `✔ Connected`. Una sesión de Claude Code que ya estaba abierta antes de crear `.mcp.json` no lo ve: hay que abrir una nueva.
+
+![Claude Code consultando el pedido 6, creado desde el chatbot](docs/evidencias/f6-claude-code-pedido.png)
 
 ## 8. Pruebas automatizadas
 

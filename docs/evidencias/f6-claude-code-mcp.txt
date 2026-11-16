@@ -1,0 +1,24 @@
+# Fase 6 - Claude Code como host MCP (2026-11-16 10:34 -05)
+# El servidor se registro en .mcp.json (alcance de proyecto) y el estudiante lo aprobo al iniciar 'claude' en la carpeta del proyecto.
+
+$ cat .mcp.json
+{
+  "mcpServers": {
+    "supermercado-mcp": {
+      "type": "http",
+      "url": "http://localhost:8888/mcp"
+    }
+  }
+}
+
+$ claude mcp list
+Checking MCP server health…
+supermercado-mcp: http://localhost:8888/mcp (HTTP) - ✔ Connected
+
+$ claude mcp get supermercado-mcp
+supermercado-mcp:
+  Scope: Project config (shared via .mcp.json)
+  Status: ✔ Connected
+  Type: http
+  URL: http://localhost:8888/mcp
+To remove this server, run: claude mcp remove supermercado-mcp -s project

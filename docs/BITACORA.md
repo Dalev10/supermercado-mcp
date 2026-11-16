@@ -410,3 +410,18 @@ cd ../chatbot-client && ./mvnw test
 **Pendiente del estudiante:** las capturas `f6-claude-conector.png` y `f6-claude-consulta.png` ("¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6"), y aprobar el servidor en Claude Code.
 
 **Evidencias:** `docs/evidencias/f6-claude-desktop-registro.txt`
+
+### Fase 6, cierre (2026-11-16)
+
+**Qué se hizo:**
+
+1. **Aprobación en Claude Code.** La instrucción inicial de usar `/mcp` en la conversación de VS Code era incorrecta: Claude Code lee `.mcp.json` solo al iniciar una sesión, y esa conversación había empezado la noche anterior, antes de crear el archivo. El estudiante abrió `claude` en una terminal dentro de la carpeta del proyecto y aprobó el servidor. `claude mcp list` pasó de "Pending approval" a "✔ Connected".
+2. **Consultas desde Claude Code.** El estudiante preguntó "¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6". Claude Code usó `listarCategorias` y `consultarPedido` y mostró las 6 categorías y el pedido 6, creado desde el chatbot en la Fase 5.
+3. **Verificación cruzada.** El registro del servidor muestra la ejecución de `listarCategorias` (10:35:07) y `consultarPedido` (10:36:16), y MySQL confirma los datos del pedido 6 (`CONFIRMADO`, $14.600).
+4. Se cerró la fase con la decisión D6.5.
+
+**Resultado:** el mismo servidor, sin cambiar una línea, atendió al chatbot (Gemini), a Claude Code (Claude), a Claude Desktop (conexión y descubrimiento de herramientas) y al Inspector, y el pedido creado en un host se consultó desde otro.
+
+**Problemas y solución:** una sesión de Claude Code abierta antes de crear `.mcp.json` no ve el servidor. Solución: iniciar una sesión nueva en la carpeta del proyecto (anotado en el README).
+
+**Evidencias:** `f6-claude-code-mcp.txt`, `f6-claude-code-consulta.txt`, `f6-claude-code-categorias.png`, `f6-claude-code-pedido.png`
