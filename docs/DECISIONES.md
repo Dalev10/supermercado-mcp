@@ -462,3 +462,12 @@ Se ejecutó después de la Fase 5 por la ruta crítica acordada en D0.5.
 - **Hallazgos:** el clasificador de seguridad de Claude Code bloqueó que el agente aprobara para sí mismo el servidor MCP del proyecto, y Claude Desktop se niega a arrancar con un puerto de depuración, que era la vía para escribir en la app y tomar capturas.
 - **Decisión:** respetar ambas protecciones y no buscar formas de rodearlas.
 - **Consecuencias:** la aprobación en Claude Code y las pruebas y capturas en Claude Desktop las hace el estudiante. Como evidencia automática de que Claude Desktop se conecta al servidor queda su propio registro (`f6-claude-desktop-registro.txt`).
+
+### D6.5 Cierre de la Fase 6
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Opciones consideradas:** a) cerrar con las consultas hechas desde Claude Code y la conexión de Claude Desktop verificada por su registro; b) repetir las consultas en Claude Desktop y capturarlas
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el objetivo de la fase, que el mismo servidor sirva a otros hosts sin cambiar código, queda demostrado con tres hosts con modelo (el chatbot con Gemini, Claude Code y Claude Desktop) más el Inspector. Las consultas reales se hicieron desde Claude Code y se comprobaron en el registro del servidor y en MySQL.
+- **Consecuencias:** de Claude Desktop hay evidencia de conexión (`f6-claude-desktop-registro.txt`) pero no de consultas; queda anotado como alcance no capturado.

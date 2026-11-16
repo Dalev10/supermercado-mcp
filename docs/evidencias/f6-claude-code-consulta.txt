@@ -1,0 +1,25 @@
+# Fase 6 - Consultas desde Claude Code (host) al servidor supermercado-mcp (2026-11-16)
+# El estudiante abrio 'claude' en la carpeta del proyecto, aprobo el servidor de .mcp.json e hizo dos preguntas.
+# Capturas: f6-claude-code-categorias.png y f6-claude-code-pedido.png
+
+## 1. "¿Qué categorías de productos hay?"
+Claude Code llamo a la herramienta listarCategorias ("Called supermercado-mcp") y respondio con las 6 categorias:
+1 Lácteos y huevos | 2 Panadería | 3 Frutas y verduras | 4 Carnes y pollo | 5 Despensa | 6 Bebidas
+
+## 2. "Muéstrame el pedido número 6"
+Claude Code llamo a consultarPedido y mostro el pedido creado desde el chatbot (Fase 5):
+Pedido 6 CONFIRMADO | Laura Gómez Restrepo | Calle 50 # 40-20, apto 301, Medellín | efectivo
+2 x Leche entera 1 L a $4.800 = $9.600 | envío $5.000 | total $14.600
+
+## Registro del servidor MCP (mcp-server/logs/supermercado-mcp.log) en esos minutos
+2026-11-16T10:35:07.466 [http-nio-127.0.0.1-8888-exec-4] Starting execution of tool: listarCategorias
+2026-11-16T10:35:07.473 [http-nio-127.0.0.1-8888-exec-4] Successful execution of tool: listarCategorias
+2026-11-16T10:36:16.348 [http-nio-127.0.0.1-8888-exec-9] Starting execution of tool: consultarPedido
+2026-11-16T10:36:16.354 [http-nio-127.0.0.1-8888-exec-9] Successful execution of tool: consultarPedido
+
+## Verificacion en MySQL del pedido 6
++----+-----------------------+------------+----------+-------------+----------+-------------+
+| id | cliente               | estado     | subtotal | costo_envio | total    | metodo_pago |
++----+-----------------------+------------+----------+-------------+----------+-------------+
+|  6 | Laura Gómez Restrepo  | CONFIRMADO |  9600.00 |     5000.00 | 14600.00 | EFECTIVO    |
++----+-----------------------+------------+----------+-------------+----------+-------------+
