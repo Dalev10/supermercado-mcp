@@ -1,0 +1,9 @@
+# Fase 3 - Pruebas unitarias (2026-11-15 22:53 -05)
+
+$ cd mcp-server && ./mvnw clean test
+[INFO] Running com.udea.supermercado.service.ClienteServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.834 s -- in com.udea.supermercado.service.ClienteServiceTest
+[INFO] Running com.udea.supermercado.service.PedidoServiceTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.224 s -- in com.udea.supermercado.service.PedidoServiceTest
+[INFO] Tests run: 39, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
