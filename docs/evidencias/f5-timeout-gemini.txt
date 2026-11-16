@@ -1,0 +1,8 @@
+# Fase 5 - Tiempo de espera de Gemini: prueba forzada con chatbot.gemini.timeout=50ms (2026-11-16 02:10 -05)
+# Sin tiempo de espera la peticion quedaba colgada indefinidamente; ahora falla rapido con un mensaje amable.
+# El SDK de Google ya no reintenta por su cuenta y Spring AI no reintenta un tiempo de espera: hay un solo intento.
+
+$ CHATBOT_GEMINI_TIMEOUT=50ms ./mvnw spring-boot:run
+$ curl -X POST http://localhost:8080/api/chat -H 'Content-Type: application/json' -d '{"conversacionId":"timeout-1","mensaje":"Hola"}'
+{"error":"La respuesta tardó demasiado. Inténtalo de nuevo en un momento."}
+(http 503, respondio en 0.308353s)

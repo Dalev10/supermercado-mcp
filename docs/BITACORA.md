@@ -244,3 +244,22 @@ curl -s -X POST http://localhost:8080/api/chat -H 'Content-Type: application/jso
 **Evidencias:** `f5-chat-pedido.txt`, `f5-chat-cliente-nuevo.txt`, `f5-chat-error-stock.txt`, `f5-chat-cuota-429.txt`, `f5-select-pedido.txt`, `f5-log-servidor.txt`, `f5-pruebas.txt` (todas en `docs/evidencias/`). Capturas pendientes del estudiante: `f5-chat-catalogo.png`, `f5-chat-pedido.png`, `f5-chat-error-stock.png`.
 
 **Commit:** `dbcfa26` en la rama `fase-5-chatbot`
+
+### Ajustes al chatbot tras tomar las capturas (2026-11-16)
+
+Al automatizar las capturas de pantalla aparecieron tres defectos más, que se corrigieron en la rama `fase-4-verificacion-protocolo`.
+
+**Cómo se tomaron las capturas:** con Google Chrome en modo headless (perfil temporal) manejado por el protocolo DevTools desde un script de Node. El script escribe los mensajes en la página real, espera cada respuesta y guarda la imagen. No se instaló nada.
+
+**Problemas y solución:**
+
+- **El chatbot se quedaba colgado sin límite cuando Gemini no respondía.** Un volcado de hilos (`jstack`) mostró la petición bloqueada esperando la respuesta de la API: el SDK de Google no trae tiempo de espera. Solución: `ChatConfig` define el bean `Client` con un tiempo de espera (`chatbot.gemini.timeout`), que reemplaza al que autoconfigura Spring AI. Se comprobó forzando un límite de 50 ms: el chatbot responde en 0,3 s con "La respuesta tardó demasiado" (`f5-timeout-gemini.txt`).
+- **Reintentos.** El `RetryTemplate` de Spring AI no reintenta un tiempo de espera agotado y por defecto hace hasta 10 intentos con esperas crecientes para otros errores. Solución: `ChatConfig` define su propio `RetryTemplate` con un máximo de intentos configurable (`chatbot.gemini.intentos`). Reintentar es seguro porque esa llamada solo genera texto; las herramientas se ejecutan fuera del reintento.
+- **El modelo duplicaba el pedido de un turno al siguiente.** En el mensaje "confirma el pedido" volvía a identificar al cliente y a crear otro pedido. Causa: la memoria de conversación guarda solo los textos, no las llamadas a herramientas ni sus resultados, así que el modelo no "recordaba" haber creado el pedido. Añadir reglas al prompt no bastó. Solución: `ChatController` guarda por conversación las últimas herramientas ejecutadas con su resultado y se las entrega al modelo en cada turno, dentro del mensaje de sistema.
+- **Texto del usuario con llaves.** `ChatClient` trata el texto como plantilla y las llaves `{}` tienen significado en ella. Solución: el prompt, el historial y el mensaje del usuario se pasan como parámetros de la plantilla, no como texto de plantilla.
+
+**Diagnóstico del nivel gratuito de Gemini.** Varias pruebas automáticas seguidas terminaron con todas las llamadas del chatbot agotando el tiempo de espera. Para aislar la causa se capturó la petición exacta que el chatbot envía a Gemini (apuntando una instancia de diagnóstico a un servidor local) y se reenvió con curl: respondió 4 de 4 veces en cerca de 1 s. El contenido de la petición es correcto. Los cuelgues aparecen en ráfagas cuando se hacen muchas llamadas seguidas (cada mensaje del usuario son entre 2 y 6 llamadas al modelo): es el límite de peticiones por minuto del nivel gratuito, que unas veces devuelve 429 y otras deja la llamada sin respuesta. Con el ritmo de una persona escribiendo el problema es mucho menos frecuente.
+
+**Reglas añadidas al prompt de sistema:** trabajar siempre sobre el mismo pedido de la conversación, y que los resúmenes reflejen exactamente lo que devolvió la herramienta.
+
+**Evidencias:** `f5-chat-catalogo.png`, `f5-chat-pedido.png`, `f5-chat-error-stock.png`, `f5-timeout-gemini.txt`

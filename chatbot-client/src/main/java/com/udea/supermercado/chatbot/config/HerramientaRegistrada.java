@@ -1,5 +1,6 @@
 package com.udea.supermercado.chatbot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ import org.springframework.ai.tool.metadata.ToolMetadata;
  */
 public class HerramientaRegistrada implements ToolCallback {
 
-    public record Llamada(String herramienta, String argumentos, boolean error) {
+    /** El resultado no viaja al navegador; se usa para recordarle al modelo lo que ya hizo en la conversacion. */
+    public record Llamada(String herramienta, String argumentos, boolean error, @JsonIgnore String resultado) {
     }
 
     // El modelo y sus herramientas se ejecutan en el hilo de la peticion HTTP (ChatClient.call() es bloqueante)
@@ -62,13 +64,14 @@ public class HerramientaRegistrada implements ToolCallback {
     public String call(String argumentos, ToolContext contexto) {
         try {
             String resultado = contexto == null ? delegada.call(argumentos) : delegada.call(argumentos, contexto);
-            LLAMADAS.get().add(new Llamada(nombre, argumentos, false));
+            LLAMADAS.get().add(new Llamada(nombre, argumentos, false, resultado));
             return resultado;
         } catch (RuntimeException e) {
             // Un error de negocio del servidor MCP (isError=true) llega aqui como excepcion. Se devuelve al
             // modelo como JSON porque Gemini rechaza un resultado de herramienta que no sea JSON valido.
-            LLAMADAS.get().add(new Llamada(nombre, argumentos, true));
-            return errorComoJson(e.getMessage());
+            String error = errorComoJson(e.getMessage());
+            LLAMADAS.get().add(new Llamada(nombre, argumentos, true, error));
+            return error;
         }
     }
 
