@@ -112,7 +112,7 @@ centro([new TextRun({ text: 'Lab Report – Home-Delivery Grocery Ordering Chatb
 centro([new TextRun({ text: 'Julián Vanegas López', size: 22 })]);
 centro([new TextRun({ text: 'Diego Alejandro Vergara Ruiz', size: 22 })], { spacing: { after: 300 } });
 centro([new TextRun({ text: 'Repositorio: ', bold: true, italics: true }), link('https://github.com/Dalev10/supermercado-mcp', 'https://github.com/Dalev10/supermercado-mcp')]);
-centro([new TextRun({ text: 'Versión entregada: ', bold: true, italics: true }), link('https://github.com/Dalev10/supermercado-mcp/releases/tag/v1.0.0', 'https://github.com/Dalev10/supermercado-mcp/releases/tag/v1.0.0')], { spacing: { after: 300 } });
+centro([new TextRun({ text: 'Versión entregada: ', bold: true, italics: true }), link('https://github.com/Dalev10/supermercado-mcp/releases/tag/v1.1.0', 'https://github.com/Dalev10/supermercado-mcp/releases/tag/v1.1.0')], { spacing: { after: 300 } });
 centro([new TextRun({ text: 'Facultad de Ingeniería, Universidad de Antioquia', italics: true, size: 22 })], { spacing: { after: 360 } });
 centro([new TextRun({ text: 'Resumen', bold: true, size: 22 })], { spacing: { after: 120 } });
 agregar(1, new Paragraph({
