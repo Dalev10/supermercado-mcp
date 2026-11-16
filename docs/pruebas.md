@@ -25,17 +25,17 @@ Tabla de pruebas integrales del proyecto, con el formato de la sección 12 del l
 | Chatbot: cliente nuevo | Teléfono no registrado | Ofrece registrar al cliente | Pide nombre y dirección y lo registra con `registrarCliente` | [f5-chat-cliente-nuevo.txt](evidencias/f5-chat-cliente-nuevo.txt) |
 | Chatbot: tema ajeno | "¿Cuál es la capital de Francia?" | Se niega con cortesía | "Solo puedo ayudarte con tus compras y pedidos en el supermercado" | [f5-chat-cliente-nuevo.txt](evidencias/f5-chat-cliente-nuevo.txt) |
 | Chatbot: fallos de Gemini | Cuota agotada y tiempo de espera forzado | Mensaje amable, sin trazas ni claves | 429: "Se agotó por ahora la cuota gratuita de Gemini"; tiempo de espera: "La respuesta tardó demasiado" en 0,3 s | [f5-chat-cuota-429.txt](evidencias/f5-chat-cuota-429.txt), [f5-timeout-gemini.txt](evidencias/f5-timeout-gemini.txt) |
-| Chatbot: validación | Mensaje vacío | HTTP 400 | `{"error":"Escribe un mensaje."}` | Bitácora, Fase 5 |
+| Chatbot: validación | Mensaje vacío | HTTP 400 | `{"error":"Escribe un mensaje."}` | Prueba manual con curl (Fase 5) |
 | Llamadas en el servidor | Log de `mcp-server` durante un pedido del chatbot | Cada `tools/call` visible | Ejecución de cada método `@Tool` registrada en el log | [f5-log-servidor.txt](evidencias/f5-log-servidor.txt) |
 | Puente para Claude Desktop | `mcp-remote` por STDIO con entorno limpio | Negociación, descubrimiento y ejecución | `initialize`, 10 herramientas y `buscarProductos` a través del puente | [f6-mcp-remote-stdio.txt](evidencias/f6-mcp-remote-stdio.txt) |
 | Claude Desktop: conexión | Abrir la app con el conector configurado | Conector activo y herramientas descubiertas | La app lanza `mcp-remote`, negocia y recibe la lista de herramientas en milisegundos | [f6-claude-desktop-registro.txt](evidencias/f6-claude-desktop-registro.txt) |
 | Claude Code: consultas | "¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6" | Respuesta con datos reales | Las 6 categorías y el pedido 6 creado desde el chatbot (confirmado, $14.600); el servidor registró `listarCategorias` y `consultarPedido` | [f6-claude-code-consulta.txt](evidencias/f6-claude-code-consulta.txt), [f6-claude-code-categorias.png](evidencias/f6-claude-code-categorias.png), [f6-claude-code-pedido.png](evidencias/f6-claude-code-pedido.png), [f6-claude-code-mcp.txt](evidencias/f6-claude-code-mcp.txt) |
-| Claude Desktop: consultas | "¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6" | Respuesta con datos reales | No se capturó: la Fase 6 se cerró con las consultas hechas desde Claude Code (decisión D6.5) | — |
+| Claude Desktop: consultas | "¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6" | Respuesta con datos reales | No se capturó: la Fase 6 se cerró con las consultas hechas desde Claude Code | — |
 | Automatizadas | `./mvnw test` en ambos módulos | Todas en verde | 39 pruebas del servidor y 6 del chatbot, sin fallos | [f7-pruebas-automatizadas.txt](evidencias/f7-pruebas-automatizadas.txt) |
 
 ## 2. Guion manual del chatbot
 
-Las respuestas de un modelo de lenguaje no son deterministas, así que el chatbot se prueba con este guion y se comprueba el resultado en la base de datos (decisión D7.1). Antes de empezar deben estar arriba MySQL, `mcp-server` y `chatbot-client`.
+Las respuestas de un modelo de lenguaje no son deterministas, así que el chatbot se prueba con este guion y se comprueba el resultado en la base de datos. Antes de empezar deben estar arriba MySQL, `mcp-server` y `chatbot-client`.
 
 **Pedido completo** (clienta de prueba con teléfono 3001234567):
 
