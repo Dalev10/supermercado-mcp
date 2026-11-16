@@ -45,4 +45,50 @@ ss -ltnp | grep -E ':(3306|8080|8888)\b' || echo "puertos libres"
 
 **Evidencias:** `docs/evidencias/f0-entorno.txt`
 
-**Commit:** se incluye en el primer commit de la Fase 1, porque el repositorio git se crea en esa fase.
+**Commit:** `4cd2276` (commit inicial de `main`; el repositorio git se creó al empezar la Fase 1)
+
+## Fase 1. Repositorio y andamiaje (2026-11-15)
+
+**Qué se hizo:**
+
+1. Se inició el repositorio git local con rama `main` y se añadió el remoto de GitHub.
+2. Se generaron los dos proyectos Maven con Spring Initializr: `mcp-server` (Web, Data JPA, Validation, MySQL Driver) y `chatbot-client` (Web, Validation), ambos con Java 21 y empaquetado jar.
+3. Se ajustó cada `pom.xml` a Spring Boot 3.5.16 y se añadieron el BOM de Spring AI 1.1.8 y los starters: `spring-ai-starter-mcp-server-webmvc` en el servidor; `spring-ai-starter-mcp-client` y `spring-ai-starter-model-google-genai` en el chatbot.
+4. Se crearon `.gitignore`, `.env.example`, `LICENSE`, `README.md` inicial y `CLAUDE.md`.
+5. Se compilaron ambos módulos.
+
+**Por qué:** tener desde el principio la estructura definitiva del monorepo y comprobar que el conjunto de versiones elegido (D1.4) se resuelve y compila antes de escribir lógica. Dos proyectos Maven independientes permiten arrancar servidor y chatbot por separado, que es como se relacionan un servidor MCP y su host.
+
+**Comandos:**
+
+```bash
+git init -b main
+git remote add origin git@github.com:Dalev10/supermercado-mcp.git
+
+curl -o mcp-server.zip https://start.spring.io/starter.zip \
+  -d type=maven-project -d language=java -d javaVersion=21 -d packaging=jar \
+  -d groupId=com.udea -d artifactId=mcp-server -d name=supermercado-mcp \
+  -d packageName=com.udea.supermercado -d baseDir=mcp-server \
+  -d dependencies=web,data-jpa,validation,mysql
+curl -o chatbot-client.zip https://start.spring.io/starter.zip \
+  -d type=maven-project -d language=java -d javaVersion=21 -d packaging=jar \
+  -d groupId=com.udea -d artifactId=chatbot-client -d name=chatbot \
+  -d packageName=com.udea.supermercado.chatbot -d baseDir=chatbot-client \
+  -d dependencies=web,validation
+unzip mcp-server.zip && unzip chatbot-client.zip
+
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+cd mcp-server && ./mvnw -q -DskipTests package
+cd ../chatbot-client && ./mvnw -q -DskipTests package
+```
+
+**Resultado:** ambos módulos compilan y generan su jar ejecutable. Maven resolvió Spring Boot 3.5.16, Spring AI 1.1.8, el SDK de MCP para Java 0.18.3 y el SDK `google-genai` 1.37.0.
+
+**Problemas y solución:**
+
+- start.spring.io rechazó `bootVersion=3.5.16` con el mensaje "Spring Boot compatibility range is >=4.0.0": hoy solo genera proyectos con Spring Boot 4.x. Solución: se generó la estructura con la versión por defecto (para obtener el wrapper de Maven y las clases base) y se reescribió el `pom.xml` tomando como base el del PDF: padre 3.5.16, `spring-boot-starter-web` en lugar de `spring-boot-starter-webmvc`, y un único `spring-boot-starter-test` en lugar de los starters de prueba separados de Boot 4.
+- Las pruebas se omiten en esta fase (`-DskipTests`) porque la prueba `contextLoads` generada necesita la base de datos y la clave de Gemini, que llegan en fases posteriores.
+
+**Evidencias:** `docs/evidencias/f1-compilacion.txt`
+
+**Commit:** `70150e2` en la rama `fase-1-andamiaje`
