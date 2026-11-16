@@ -337,3 +337,60 @@ Desde el Inspector se confirmó además el pedido 16, con el mismo efecto en la 
 **Evidencias:** `f4-curl-initialize.txt`, `f4-curl-initialized.txt`, `f4-curl-tools-list.txt`, `f4-curl-tools-call.txt`, `f4-plan-pruebas.txt`, `f4-select-post-confirmar.txt`, `f4-inspector-conexion.png`, `f4-inspector-tools.png`, `f4-inspector-confirmar.png` (todas en `docs/evidencias/`).
 
 **Commit:** `95cf16c` en la rama `fase-4-verificacion-protocolo` (junto con `891404f`, los ajustes al chatbot)
+
+## Fase 6. Claude Desktop y Claude Code como hosts (2026-11-16, en curso)
+
+**Qué se hizo hasta ahora:**
+
+1. **Claude Code.** `claude mcp add --transport http --scope project supermercado-mcp http://localhost:8888/mcp` generó `.mcp.json` en la raíz. Queda pendiente que el usuario apruebe el servidor en Claude Code.
+2. **Puente `mcp-remote` 0.16.6.** Antes de configurar Claude Desktop se probó el puente por la entrada estándar con un entorno limpio (sin el `PATH` de nvm, como lo lanzará la aplicación). Negoció, listó las 10 herramientas y ejecutó `buscarProductos`, reenviando cada mensaje por Streamable HTTP.
+3. **Instalación de Claude Desktop** desde el repositorio apt oficial, con la huella de la llave verificada antes de instalarla.
+4. **Configuración.** Se creó `~/.config/Claude/claude_desktop_config.json` con el conector `supermercado-mcp`.
+
+**Por qué:** demostrar que el mismo servidor, sin cambiar una línea, atiende a otros hosts que aportan su propio modelo.
+
+**Comandos:**
+
+```bash
+claude mcp add --transport http --scope project supermercado-mcp http://localhost:8888/mcp
+
+# Instalación (https://code.claude.com/docs/en/desktop-linux)
+curl -fsSLo key.asc https://downloads.claude.ai/claude-desktop/key.asc
+gpg --show-keys key.asc          # la huella debe ser 31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE
+sudo install -m 0644 key.asc /usr/share/keyrings/claude-desktop-archive-keyring.asc
+echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-desktop.list
+sudo apt update && sudo apt install claude-desktop
+```
+
+**Problemas y solución:**
+
+- La terminal de Claude Code no es interactiva y no puede pedir la contraseña de sudo. Solución: `SUDO_ASKPASS` con una ventana de `zenity`, donde la escribió el estudiante.
+- Claude Desktop no encuentra `npx` cuando Node se instaló con nvm. Solución: rutas absolutas a `node` y `npx` y un `PATH` explícito en la configuración.
+
+**Evidencias:** `docs/evidencias/f6-mcp-remote-stdio.txt`. Pendientes: `f6-claude-conector.png`, `f6-claude-consulta.png` y `f6-claude-code-mcp.txt`.
+
+## Fase 7. Pruebas integrales (2026-11-16)
+
+**Qué se hizo:** se reunieron en `docs/pruebas.md` todas las pruebas ejecutadas en las fases anteriores, con el formato de la sección 12 del laboratorio, el resultado obtenido y el enlace a su evidencia. Se volvieron a ejecutar las pruebas automatizadas de ambos módulos y se escribió el guion manual del chatbot (D7.1).
+
+**Comandos:**
+
+```bash
+cd mcp-server && ./mvnw test
+cd ../chatbot-client && ./mvnw test
+```
+
+**Resultado:** 39 pruebas del servidor y 6 del chatbot, sin fallos. La tabla tiene 24 pruebas integrales; solo queda pendiente la de Claude Desktop.
+
+**Evidencias:** `docs/evidencias/f7-pruebas-automatizadas.txt`
+
+## Fase 8. Documentación del repositorio (2026-11-16)
+
+**Qué se hizo:**
+
+1. `README.md` completo: qué hace, arquitectura, requisitos, puesta en marcha paso a paso, herramientas, modelo de datos, cómo probar con curl, Inspector, el chatbot, Claude Desktop y Claude Code, pruebas, seguridad y autores.
+2. `docs/arquitectura.md`: roles MCP, diagramas Mermaid de componentes, entidad-relación, estados y secuencia de un pedido, el flujo de nueve pasos de la sección 11 del laboratorio aplicado a este caso, la comparación de hosts y la sección de seguridad.
+3. `docs/pruebas.md` (Fase 7).
+
+**Verificación:** se comprobó que ningún enlace relativo de los tres documentos esté roto. Se clonó el repositorio en una carpeta nueva y, siguiendo el README, se copió `.env.example` a `.env`, se validó `docker-compose.yml` y se compilaron y probaron los dos módulos. No se levantó un segundo MySQL desde el clon porque el contenedor tiene un nombre fijo y ya había uno en ejecución; ese paso es el mismo que se verificó en la Fase 2.

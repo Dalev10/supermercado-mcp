@@ -1,0 +1,17 @@
+# Fase 7 - Pruebas automatizadas de ambos modulos (2026-11-16 09:29 -05)
+
+$ cd mcp-server && ./mvnw test
+[INFO] Running com.udea.supermercado.service.ClienteServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.740 s -- in com.udea.supermercado.service.ClienteServiceTest
+[INFO] Running com.udea.supermercado.service.PedidoServiceTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.290 s -- in com.udea.supermercado.service.PedidoServiceTest
+[INFO] Tests run: 39, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+$ cd chatbot-client && ./mvnw test
+[INFO] Running com.udea.supermercado.chatbot.web.ChatControllerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.094 s -- in com.udea.supermercado.chatbot.web.ChatControllerTest
+[INFO] Running com.udea.supermercado.chatbot.config.HerramientaRegistradaTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.111 s -- in com.udea.supermercado.chatbot.config.HerramientaRegistradaTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
