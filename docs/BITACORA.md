@@ -394,3 +394,19 @@ cd ../chatbot-client && ./mvnw test
 3. `docs/pruebas.md` (Fase 7).
 
 **Verificación:** se comprobó que ningún enlace relativo de los tres documentos esté roto. Se clonó el repositorio en una carpeta nueva y, siguiendo el README, se copió `.env.example` a `.env`, se validó `docker-compose.yml` y se compilaron y probaron los dos módulos. No se levantó un segundo MySQL desde el clon porque el contenedor tiene un nombre fijo y ya había uno en ejecución; ese paso es el mismo que se verificó en la Fase 2.
+
+### Fase 6, continuación (2026-11-16)
+
+**Qué se hizo:**
+
+1. Al abrir Claude Desktop, la aplicación lanzó el puente `mcp-remote` y se conectó al servidor. Su registro muestra la negociación (`initialize`), el fin de inicialización y las listas de herramientas, prompts y recursos, todas respondidas en milisegundos (`f6-claude-desktop-registro.txt`).
+2. Se explicó el error `HeadersTimeoutError` que aparece en ese registro unos 5 minutos después de conectar. Ocurre en la conexión GET opcional que el cliente Streamable HTTP deja abierta para recibir avisos del servidor. Este servidor no envía avisos, el cliente HTTP de Node corta esa conexión vacía por tiempo y `mcp-remote` la reabre. No afecta a las llamadas a herramientas, que viajan por POST.
+3. El estudiante pidió que Claude Code completara todo lo pendiente. Dos pasos no se pudieron automatizar, por protecciones deliberadas:
+   - **Aprobar el servidor en Claude Code.** El clasificador de seguridad de Claude Code bloqueó que el propio agente escribiera la aprobación en `.claude/settings.local.json`, porque sería el agente aprobando herramientas para sí mismo. La aprobación queda a cargo del usuario (`/mcp` en Claude Code).
+   - **Manejar Claude Desktop para las capturas.** Se intentó abrir la app con un puerto de depuración local, como se hizo con Chrome para el chatbot y el Inspector. La app se niega a arrancar así ("refusing to start — a debugging or network-override switch is present on the command line"). No se intentó rodear esa protección: las preguntas de prueba y las capturas en Claude Desktop las hace el estudiante.
+
+**Resultado:** el conector `supermercado-mcp` está activo en Claude Desktop y su registro confirma que descubre las herramientas del servidor.
+
+**Pendiente del estudiante:** las capturas `f6-claude-conector.png` y `f6-claude-consulta.png` ("¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6"), y aprobar el servidor en Claude Code.
+
+**Evidencias:** `docs/evidencias/f6-claude-desktop-registro.txt`

@@ -28,7 +28,8 @@ Tabla de pruebas integrales del proyecto, con el formato de la sección 12 del l
 | Chatbot: validación | Mensaje vacío | HTTP 400 | `{"error":"Escribe un mensaje."}` | Bitácora, Fase 5 |
 | Llamadas en el servidor | Log de `mcp-server` durante un pedido del chatbot | Cada `tools/call` visible | Ejecución de cada método `@Tool` registrada en el log | [f5-log-servidor.txt](evidencias/f5-log-servidor.txt) |
 | Puente para Claude Desktop | `mcp-remote` por STDIO con entorno limpio | Negociación, descubrimiento y ejecución | `initialize`, 10 herramientas y `buscarProductos` a través del puente | [f6-mcp-remote-stdio.txt](evidencias/f6-mcp-remote-stdio.txt) |
-| Claude Desktop | Consultar el catálogo y un pedido | Respuesta con datos reales | Pendiente: se completa en la Fase 6 | — |
+| Claude Desktop: conexión | Abrir la app con el conector configurado | Conector activo y herramientas descubiertas | La app lanza `mcp-remote`, negocia y recibe la lista de herramientas en milisegundos | [f6-claude-desktop-registro.txt](evidencias/f6-claude-desktop-registro.txt) |
+| Claude Desktop: consultas | "¿Qué categorías de productos hay?" y "Muéstrame el pedido número 6" | Respuesta con datos reales | Pendiente: la ejecuta el estudiante | — |
 | Automatizadas | `./mvnw test` en ambos módulos | Todas en verde | 39 pruebas del servidor y 6 del chatbot, sin fallos | [f7-pruebas-automatizadas.txt](evidencias/f7-pruebas-automatizadas.txt) |
 
 ## 2. Guion manual del chatbot

@@ -454,3 +454,11 @@ Se ejecutó después de la Fase 5 por la ruta crítica acordada en D0.5.
 - **Decisión del estudiante:** a
 - **Justificación:** quien abra el repositorio ve el proyecto funcionando sin ejecutarlo. Se revisó que ninguna muestre claves ni datos personales reales.
 - **Consecuencias:** el README muestra capturas del chatbot y del Inspector.
+
+### D6.4 Pasos de la Fase 6 que no se pudieron automatizar (no prevista en la guía)
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Contexto:** el estudiante pidió que Claude Code completara todo el proceso pendiente.
+- **Hallazgos:** el clasificador de seguridad de Claude Code bloqueó que el agente aprobara para sí mismo el servidor MCP del proyecto, y Claude Desktop se niega a arrancar con un puerto de depuración, que era la vía para escribir en la app y tomar capturas.
+- **Decisión:** respetar ambas protecciones y no buscar formas de rodearlas.
+- **Consecuencias:** la aprobación en Claude Code y las pruebas y capturas en Claude Desktop las hace el estudiante. Como evidencia automática de que Claude Desktop se conecta al servidor queda su propio registro (`f6-claude-desktop-registro.txt`).
