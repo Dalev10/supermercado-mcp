@@ -1,0 +1,45 @@
+# Fase 0 - Verificacion del entorno (2026-11-15 22:13 -05)
+
+$ lsb_release -a
+Distributor ID:	Ubuntu
+Description:	Ubuntu 22.04.5 LTS
+Release:	22.04
+Codename:	jammy
+
+$ java -version   # predeterminado del sistema
+openjdk version "17.0.21.0.2" 2026-10-22 LTS
+OpenJDK Runtime Environment (build 17.0.21.0.2+5-LTS)
+OpenJDK 64-Bit Server VM (build 17.0.21.0.2+5-LTS, mixed mode, sharing)
+JAVA_HOME=[]
+
+$ JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ; $JAVA_HOME/bin/java -version ; $JAVA_HOME/bin/javac -version   # JDK usado por el proyecto
+openjdk version "21.0.13.0.3" 2026-10-24
+OpenJDK Runtime Environment (build 21.0.13.0.3+1-1-22.04.1-Ubuntu)
+OpenJDK 64-Bit Server VM (build 21.0.13.0.3+1-1-22.04.1-Ubuntu, mixed mode, sharing)
+javac 21.0.13.0.3
+
+$ docker --version && docker compose version
+Docker version 29.9.2, build a82e528
+Docker Compose version v5.6.1
+
+$ id -nG | grep -o docker
+docker
+
+$ docker run --rm hello-world | grep Hello
+Hello from Docker!
+
+$ node --version && npm --version && which npx
+v22.22.3
+10.9.8
+~/.nvm/versions/node/v22.22.3/bin/npx
+
+$ git --version
+git version 2.34.1
+user.name configurado: si
+user.email configurado: si
+
+$ gh --version
+/bin/bash: line 37: gh: command not found
+
+$ ss -ltnp | grep -E ':(3306|8080|8888)\b' || echo "puertos libres"
+puertos libres

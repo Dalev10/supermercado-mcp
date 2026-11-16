@@ -1,0 +1,17 @@
+# Secretos: solo se versiona .env.example
+.env
+.env.*
+!.env.example
+
+# Maven y ejecucion
+target/
+logs/
+*.log
+
+# IDE y sistema
+.idea/
+*.iml
+.vscode/
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
