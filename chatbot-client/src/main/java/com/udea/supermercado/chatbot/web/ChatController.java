@@ -1,12 +1,16 @@
 package com.udea.supermercado.chatbot.web;
 
+import com.udea.supermercado.chatbot.config.ChatConfig;
 import com.udea.supermercado.chatbot.config.HerramientaRegistrada;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +40,15 @@ public class ChatController {
     public record Respuesta(String respuesta, List<HerramientaRegistrada.Llamada> herramientas) {
     }
 
+    private static final int MAX_TRAZA = 15;
+    private static final int MAX_RESULTADO = 500;
+
     private final ChatClient chatClient;
+
+    // La memoria de chat solo guarda los textos. Sin este historial el modelo no recuerda que herramientas ya
+    // ejecuto ni los ids que devolvieron, y en el turno siguiente repetia pasos (creaba el pedido otra vez).
+    // shortcut: en memoria y sin limite de conversaciones, igual que ChatMemory; persistirlo si debe sobrevivir reinicios
+    private final Map<String, Deque<String>> trazas = new ConcurrentHashMap<>();
 
     public ChatController(ChatClient chatClient) {
         this.chatClient = chatClient;
@@ -45,9 +57,19 @@ public class ChatController {
     @PostMapping
     public Respuesta chat(@Valid @RequestBody Peticion peticion) {
         HerramientaRegistrada.tomarLlamadas(); // el hilo viene de un pool: se descarta lo que hubiera quedado
+        Deque<String> traza = trazas.computeIfAbsent(peticion.conversacionId(), k -> new ConcurrentLinkedDeque<>());
+        String historial = traza.isEmpty() ? "" : """
+
+                Herramientas que ya ejecutaste en esta conversación, con su resultado (la más reciente al final). \
+                Toma de aquí los identificadores y el estado actual, y no repitas una llamada que ya está hecha:
+                """ + String.join("\n", traza);
+        List<HerramientaRegistrada.Llamada> llamadas = List.of();
         try {
             ChatResponse respuesta = chatClient.prompt()
-                    .user(peticion.mensaje())
+                    // Los textos van como parametros: asi las llaves de un JSON o del usuario no se toman por plantilla
+                    .system(s -> s.text("{prompt}{historial}")
+                            .param("prompt", ChatConfig.PROMPT_SISTEMA).param("historial", historial))
+                    .user(u -> u.text("{mensaje}").param("mensaje", peticion.mensaje()))
                     .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, peticion.conversacionId()))
                     .call()
                     .chatResponse();
@@ -60,10 +82,23 @@ public class ChatController {
             if (texto.isBlank()) {
                 texto = "No pude generar una respuesta. ¿Puedes reformular tu mensaje?";
             }
-            return new Respuesta(texto, HerramientaRegistrada.tomarLlamadas());
+            llamadas = HerramientaRegistrada.tomarLlamadas();
+            return new Respuesta(texto, llamadas);
         } finally {
-            HerramientaRegistrada.tomarLlamadas();
+            // Tambien si el modelo fallo a mitad de camino: lo que alcanzo a ejecutarse ya esta hecho en el servidor
+            if (llamadas.isEmpty()) {
+                llamadas = HerramientaRegistrada.tomarLlamadas();
+            }
+            llamadas.forEach(l -> traza.add(l.herramienta() + " " + l.argumentos() + " -> " + abreviar(l.resultado())));
+            while (traza.size() > MAX_TRAZA) {
+                traza.pollFirst();
+            }
         }
+    }
+
+    static String abreviar(String resultado) {
+        String texto = String.valueOf(resultado);
+        return texto.length() <= MAX_RESULTADO ? texto : texto.substring(0, MAX_RESULTADO) + "…(recortado)";
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

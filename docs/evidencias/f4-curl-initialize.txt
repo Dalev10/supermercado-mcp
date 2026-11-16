@@ -1,0 +1,39 @@
+# Fase 4 - Paso 1: initialize (negociacion de version y capacidades) (2026-11-16 02:04 -05)
+
+$ curl -i -X POST http://localhost:8888/mcp \
+    -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+    -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"curl","version":"1.0"}}}'
+
+# Cabeceras de la respuesta (Mcp-Session-Id identifica la sesion en las peticiones siguientes)
+HTTP/1.1 200 
+Mcp-Session-Id: 6cf6e551-a512-46e2-8d21-44047f94d116
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 16 Nov 2026 07:04:35 GMT
+
+# Cuerpo: esta respuesta llega como application/json; las de tools/list y tools/call llegan como evento SSE (linea data:)
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-03-26",
+    "capabilities": {
+      "completions": {},
+      "logging": {},
+      "prompts": {
+        "listChanged": true
+      },
+      "resources": {
+        "subscribe": false,
+        "listChanged": true
+      },
+      "tools": {
+        "listChanged": true
+      }
+    },
+    "serverInfo": {
+      "name": "supermercado-mcp-server",
+      "version": "1.0.0"
+    }
+  }
+}

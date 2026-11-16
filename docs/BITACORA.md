@@ -244,3 +244,96 @@ curl -s -X POST http://localhost:8080/api/chat -H 'Content-Type: application/jso
 **Evidencias:** `f5-chat-pedido.txt`, `f5-chat-cliente-nuevo.txt`, `f5-chat-error-stock.txt`, `f5-chat-cuota-429.txt`, `f5-select-pedido.txt`, `f5-log-servidor.txt`, `f5-pruebas.txt` (todas en `docs/evidencias/`). Capturas pendientes del estudiante: `f5-chat-catalogo.png`, `f5-chat-pedido.png`, `f5-chat-error-stock.png`.
 
 **Commit:** `dbcfa26` en la rama `fase-5-chatbot`
+
+### Ajustes al chatbot tras tomar las capturas (2026-11-16)
+
+Al automatizar las capturas de pantalla aparecieron tres defectos más, que se corrigieron en la rama `fase-4-verificacion-protocolo`.
+
+**Cómo se tomaron las capturas:** con Google Chrome en modo headless (perfil temporal) manejado por el protocolo DevTools desde un script de Node. El script escribe los mensajes en la página real, espera cada respuesta y guarda la imagen. No se instaló nada.
+
+**Problemas y solución:**
+
+- **El chatbot se quedaba colgado sin límite cuando Gemini no respondía.** Un volcado de hilos (`jstack`) mostró la petición bloqueada esperando la respuesta de la API: el SDK de Google no trae tiempo de espera. Solución: `ChatConfig` define el bean `Client` con un tiempo de espera (`chatbot.gemini.timeout`), que reemplaza al que autoconfigura Spring AI. Se comprobó forzando un límite de 50 ms: el chatbot responde en 0,3 s con "La respuesta tardó demasiado" (`f5-timeout-gemini.txt`).
+- **Reintentos.** El `RetryTemplate` de Spring AI no reintenta un tiempo de espera agotado y por defecto hace hasta 10 intentos con esperas crecientes para otros errores. Solución: `ChatConfig` define su propio `RetryTemplate` con un máximo de intentos configurable (`chatbot.gemini.intentos`). Reintentar es seguro porque esa llamada solo genera texto; las herramientas se ejecutan fuera del reintento.
+- **El modelo duplicaba el pedido de un turno al siguiente.** En el mensaje "confirma el pedido" volvía a identificar al cliente y a crear otro pedido. Causa: la memoria de conversación guarda solo los textos, no las llamadas a herramientas ni sus resultados, así que el modelo no "recordaba" haber creado el pedido. Añadir reglas al prompt no bastó. Solución: `ChatController` guarda por conversación las últimas herramientas ejecutadas con su resultado y se las entrega al modelo en cada turno, dentro del mensaje de sistema.
+- **Texto del usuario con llaves.** `ChatClient` trata el texto como plantilla y las llaves `{}` tienen significado en ella. Solución: el prompt, el historial y el mensaje del usuario se pasan como parámetros de la plantilla, no como texto de plantilla.
+
+**Diagnóstico del nivel gratuito de Gemini.** Varias pruebas automáticas seguidas terminaron con todas las llamadas del chatbot agotando el tiempo de espera. Para aislar la causa se capturó la petición exacta que el chatbot envía a Gemini (apuntando una instancia de diagnóstico a un servidor local) y se reenvió con curl: respondió 4 de 4 veces en cerca de 1 s. El contenido de la petición es correcto. Los cuelgues aparecen en ráfagas cuando se hacen muchas llamadas seguidas (cada mensaje del usuario son entre 2 y 6 llamadas al modelo): es el límite de peticiones por minuto del nivel gratuito, que unas veces devuelve 429 y otras deja la llamada sin respuesta. Con el ritmo de una persona escribiendo el problema es mucho menos frecuente.
+
+**Reglas añadidas al prompt de sistema:** trabajar siempre sobre el mismo pedido de la conversación, y que los resúmenes reflejen exactamente lo que devolvió la herramienta.
+
+**Evidencias:** `f5-chat-catalogo.png`, `f5-chat-pedido.png`, `f5-chat-error-stock.png`, `f5-timeout-gemini.txt`
+
+## Fase 4. Verificación del protocolo MCP (2026-11-16)
+
+Se ejecutó después de la Fase 5 por la ruta crítica (D0.5).
+
+**Qué se hizo:**
+
+1. Con curl se recorrió el ciclo completo del protocolo contra `http://localhost:8888/mcp`, guardando cada petición y respuesta.
+2. Se ejecutó por JSON-RPC, sin ningún modelo de lenguaje, el plan de pruebas de seis pasos de la guía, comprobando cada escritura con un `SELECT` en MySQL.
+3. Se conectó MCP Inspector 2.13.0 al servidor por Streamable HTTP, se listaron las herramientas, se ejecutó `buscarProductos` y se confirmó un pedido desde su interfaz.
+
+**Por qué:** esta fase separa el protocolo del modelo. Si una herramienta responde bien por JSON-RPC y por el Inspector, cualquier fallo posterior en una conversación es del modelo o del host, no del servidor. También muestra qué viaja realmente por la red, que es lo que hay que explicar del protocolo.
+
+**El ciclo MCP, con lo observado:**
+
+| Paso | Petición | Respuesta observada |
+|---|---|---|
+| 1. Negociación | `initialize` con `protocolVersion`, `capabilities` y `clientInfo` | HTTP 200 en `application/json`, con la cabecera `Mcp-Session-Id`, la versión `2025-03-26`, las capacidades del servidor (`tools`, `resources`, `prompts`, `logging`, `completions`) y `serverInfo` |
+| 2. Fin de inicialización | `notifications/initialized` (notificación, sin `id`) con la cabecera de sesión | HTTP 202 sin cuerpo |
+| 3. Descubrimiento | `tools/list` | Evento SSE (`text/event-stream`) con las 10 herramientas: nombre, descripción y esquema JSON de entrada con sus campos obligatorios |
+| 4. Ejecución | `tools/call` con `name` y `arguments` | Evento SSE con `result.content[0].text` (el DTO serializado como JSON) e `isError: false` |
+
+Un error de negocio no es un error JSON-RPC: llega como un `result` normal con `isError: true` y el mensaje en español.
+
+**Comandos:**
+
+```bash
+# 1. initialize: anotar la cabecera Mcp-Session-Id
+curl -i -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"curl","version":"1.0"}}}'
+
+# 2. notificación
+curl -i -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+  -H "Mcp-Session-Id: <ID>" -d '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+
+# 3. descubrimiento y 4. ejecución
+curl -s -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+  -H "Mcp-Session-Id: <ID>" -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+curl -s -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+  -H "Mcp-Session-Id: <ID>" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"buscarProductos","arguments":{"texto":"leche"}}}'
+
+# MCP Inspector
+npx @modelcontextprotocol/inspector
+```
+
+En el Inspector 2.13.0: abrir la URL que imprime la consola, "Add Servers" → "Add manually", identificador `supermercado-mcp`, transporte `streamable-http`, URL `http://localhost:8888/mcp`, activar el interruptor de conexión y abrir la pestaña "Tools".
+
+**Resultado del plan de pruebas (pedido 15, `f4-plan-pruebas.txt`):**
+
+| Paso | Qué se probó | Resultado |
+|---|---|---|
+| 1 | `listarCategorias` y `buscarProductos` con "leche" | 6 categorías y 2 productos reales de MySQL |
+| 2 | `registrarCliente` | Fila nueva en `cliente`; registrar otra vez el mismo teléfono falla |
+| 3 | `crearPedido`, dos `agregarProductoAPedido` y `consultarPedido` | Pedido en `BORRADOR` con 2 líneas, subtotal $31.300, envío $5.000 |
+| 4 | Agregar 3 gaseosas habiendo 1 y confirmar | Se agrega (D2.7), pero `confirmarPedido` falla con "Stock insuficiente de Gaseosa cola 1.5 L: se pidieron 3 y hay 1"; el pedido sigue en `BORRADOR` y no se descuenta el stock de ninguna línea |
+| 5 | Quitar la gaseosa y confirmar | `CONFIRMADO`, total $36.300; arroz 80 → 78, café 16 → 15; un pedido confirmado ya no se modifica |
+| 6 | `cancelarPedido` | `CANCELADO`; arroz y café vuelven a 80 y 16; cancelarlo otra vez falla y no devuelve stock de nuevo |
+
+Desde el Inspector se confirmó además el pedido 16, con el mismo efecto en la base (`f4-select-post-confirmar.txt`).
+
+**Problemas y solución:**
+
+- La respuesta de `initialize` llega como `application/json`, mientras que las de `tools/list` y `tools/call` llegan como eventos SSE (líneas `id:`, `event:` y `data:`). El JSON-RPC está en la línea `data:`. Un cliente de Streamable HTTP debe aceptar ambos formatos, por eso la cabecera `Accept: application/json, text/event-stream`.
+- El PDF lanza el Inspector 0.12.0 con el argumento `sse`. No se heredó: se usó la versión reciente y el transporte Streamable HTTP. Su interfaz cambió por completo respecto a las capturas del PDF.
+- El Inspector cierra la conexión tras unos minutos de inactividad; basta volver a activar el interruptor.
+
+**Evidencias:** `f4-curl-initialize.txt`, `f4-curl-initialized.txt`, `f4-curl-tools-list.txt`, `f4-curl-tools-call.txt`, `f4-plan-pruebas.txt`, `f4-select-post-confirmar.txt`, `f4-inspector-conexion.png`, `f4-inspector-tools.png`, `f4-inspector-confirmar.png` (todas en `docs/evidencias/`).
+
+**Commit:** `95cf16c` en la rama `fase-4-verificacion-protocolo` (junto con `891404f`, los ajustes al chatbot)

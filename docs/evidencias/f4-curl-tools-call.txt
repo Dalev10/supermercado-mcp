@@ -1,0 +1,18 @@
+# Fase 4 - Paso 4: tools/call de lectura (el servidor ejecuta el metodo @Tool y devuelve el resultado como texto JSON)
+
+$ curl -s -X POST http://localhost:8888/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+    -H "Mcp-Session-Id: <ID>" -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"buscarProductos","arguments":{"texto":"leche"}}}'
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[{\"id\":2,\"nombre\":\"Leche deslactosada\",\"unidad\":\"1 L\",\"descripcion\":\"Leche semidescremada sin lactosa\",\"categoria\":\"Lácteos y huevos\",\"precio\":5600.00,\"stock\":25,\"disponible\":true},{\"id\":1,\"nombre\":\"Leche entera\",\"unidad\":\"1 L\",\"descripcion\":\"Leche entera pasteurizada en bolsa\",\"categoria\":\"Lácteos y huevos\",\"precio\":4800.00,\"stock\":34,\"disponible\":true}]"
+      }
+    ],
+    "isError": false
+  }
+}

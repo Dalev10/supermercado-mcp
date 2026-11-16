@@ -1,0 +1,427 @@
+# Fase 4 - Plan de pruebas ejecutado por JSON-RPC contra http://localhost:8888/mcp, sin ningun LLM (2026-11-16 02:44 -05)
+# Cada escritura se comprueba con un SELECT en MySQL. '>>>' es la peticion tools/call y '<<<' la respuesta del servidor.
+
+====================================================================================================
+1. Lectura: listarCategorias y buscarProductos con el texto 'leche'
+====================================================================================================
+
+>>> tools/call listarCategorias {}
+<<< isError=false
+{"id": 6, "nombre": "Bebidas", "descripcion": "Agua, jugos, gaseosas y bebidas calientes"}
+{"id": 4, "nombre": "Carnes y pollo", "descripcion": "Res, cerdo, pollo y carnes frías"}
+{"id": 5, "nombre": "Despensa", "descripcion": "Granos, aceite, azúcar, café y pastas"}
+{"id": 3, "nombre": "Frutas y verduras", "descripcion": "Productos frescos vendidos por kilo o por unidad"}
+{"id": 1, "nombre": "Lácteos y huevos", "descripcion": "Leche, quesos, yogures, mantequilla y huevos"}
+{"id": 2, "nombre": "Panadería", "descripcion": "Pan, arepas y tostadas"}
+
+>>> tools/call buscarProductos {"texto": "leche"}
+<<< isError=false
+{"id": 2, "nombre": "Leche deslactosada", "unidad": "1 L", "descripcion": "Leche semidescremada sin lactosa", "categoria": "Lácteos y huevos", "precio": 5600.0, "stock": 25, "disponible": true}
+{"id": 1, "nombre": "Leche entera", "unidad": "1 L", "descripcion": "Leche entera pasteurizada en bolsa", "categoria": "Lácteos y huevos", "precio": 4800.0, "stock": 32, "disponible": true}
+
+====================================================================================================
+2. Escritura: registrarCliente con datos ficticios, y comprobacion en la tabla cliente
+====================================================================================================
+
+>>> tools/call registrarCliente {"nombre": "María Fernanda Ruiz", "telefono": "3151112233", "direccion": "Calle 33 # 65-10, Medellín"}
+<<< isError=false
+{
+  "id": 4,
+  "nombre": "María Fernanda Ruiz",
+  "telefono": "3151112233",
+  "direccion": "Calle 33 # 65-10, Medellín",
+  "email": null
+}
+
+mysql> SELECT id, nombre, telefono, direccion, creado_en FROM cliente WHERE telefono = '3151112233'
++----+----------------------+------------+-----------------------------+---------------------+
+| id | nombre               | telefono   | direccion                   | creado_en           |
++----+----------------------+------------+-----------------------------+---------------------+
+|  4 | María Fernanda Ruiz  | 3151112233 | Calle 33 # 65-10, Medellín  | 2026-11-16 02:44:04 |
++----+----------------------+------------+-----------------------------+---------------------+
+
+# Regla: telefono unico. Registrar otra vez el mismo telefono debe fallar
+
+>>> tools/call registrarCliente {"nombre": "Otra Persona", "telefono": "3151112233", "direccion": "Carrera 1 # 2-3"}
+<<< isError=true
+Ya existe un cliente registrado con el teléfono 3151112233. Consúltalo con buscarCliente en lugar de registrarlo de nuevo.
+
+====================================================================================================
+3. crearPedido, agregarProductoAPedido (dos productos) y consultarPedido
+====================================================================================================
+
+>>> tools/call crearPedido {"clienteId": 4}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [],
+  "subtotal": 0,
+  "costoEnvio": 0,
+  "total": 0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+>>> tools/call agregarProductoAPedido {"pedidoId": 15, "productoId": 21, "cantidad": 2}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    }
+  ],
+  "subtotal": 9800.0,
+  "costoEnvio": 5000,
+  "total": 14800.0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+>>> tools/call agregarProductoAPedido {"pedidoId": 15, "productoId": 27, "cantidad": 1}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    }
+  ],
+  "subtotal": 31300.0,
+  "costoEnvio": 5000,
+  "total": 36300.0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+>>> tools/call consultarPedido {"pedidoId": 15}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    }
+  ],
+  "subtotal": 31300.0,
+  "costoEnvio": 5000.0,
+  "total": 36300.0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+mysql> SELECT id, cliente_id, estado, subtotal, costo_envio, total FROM pedido WHERE id = 15
++----+------------+----------+----------+-------------+----------+
+| id | cliente_id | estado   | subtotal | costo_envio | total    |
++----+------------+----------+----------+-------------+----------+
+| 15 |          4 | BORRADOR | 31300.00 |     5000.00 | 36300.00 |
++----+------------+----------+----------+-------------+----------+
+
+mysql> SELECT pedido_id, producto_id, cantidad, precio_unitario, subtotal FROM detalle_pedido WHERE pedido_id = 15
++-----------+-------------+----------+-----------------+----------+
+| pedido_id | producto_id | cantidad | precio_unitario | subtotal |
++-----------+-------------+----------+-----------------+----------+
+|        15 |          21 |        2 |         4900.00 |  9800.00 |
+|        15 |          27 |        1 |        21500.00 | 21500.00 |
++-----------+-------------+----------+-----------------+----------+
+
+====================================================================================================
+4. Regla de negocio: cantidad mayor al stock. Se puede agregar (D2.7), pero confirmarPedido debe fallar
+====================================================================================================
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    80 |
+| 27 | Café molido  | 500 g  |    16 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+>>> tools/call agregarProductoAPedido {"pedidoId": 15, "productoId": 31, "cantidad": 3}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    },
+    {
+      "productoId": 31,
+      "producto": "Gaseosa cola",
+      "unidad": "1.5 L",
+      "cantidad": 3,
+      "precioUnitario": 6500.0,
+      "subtotal": 19500.0
+    }
+  ],
+  "subtotal": 50800.0,
+  "costoEnvio": 5000,
+  "total": 55800.0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+>>> tools/call confirmarPedido {"pedidoId": 15, "metodoPago": "EFECTIVO"}
+<<< isError=true
+No se puede confirmar el pedido 15. Stock insuficiente de Gaseosa cola 1.5 L: se pidieron 3 y hay 1. Reduce la cantidad o quita el producto y vuelve a confirmar.
+
+# El pedido sigue en BORRADOR y no se desconto el stock de NINGUNA linea (ni las que si tenian)
+
+mysql> SELECT id, estado, total FROM pedido WHERE id = 15
++----+----------+----------+
+| id | estado   | total    |
++----+----------+----------+
+| 15 | BORRADOR | 55800.00 |
++----+----------+----------+
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    80 |
+| 27 | Café molido  | 500 g  |    16 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+====================================================================================================
+5. confirmarPedido valido: se quita el producto sin stock y se confirma
+====================================================================================================
+
+>>> tools/call quitarProductoDePedido {"pedidoId": 15, "productoId": 31}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "BORRADOR",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    }
+  ],
+  "subtotal": 31300.0,
+  "costoEnvio": 5000,
+  "total": 36300.0,
+  "metodoPago": null,
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": null
+}
+
+>>> tools/call confirmarPedido {"pedidoId": 15, "metodoPago": "EFECTIVO"}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "CONFIRMADO",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    }
+  ],
+  "subtotal": 31300.0,
+  "costoEnvio": 5000,
+  "total": 36300.0,
+  "metodoPago": "EFECTIVO",
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": "2026-11-16T02:44:05"
+}
+
+mysql> SELECT id, estado, subtotal, costo_envio, total, metodo_pago, confirmado_en FROM pedido WHERE id = 15
++----+------------+----------+-------------+----------+-------------+---------------------+
+| id | estado     | subtotal | costo_envio | total    | metodo_pago | confirmado_en       |
++----+------------+----------+-------------+----------+-------------+---------------------+
+| 15 | CONFIRMADO | 31300.00 |     5000.00 | 36300.00 | EFECTIVO    | 2026-11-16 02:44:05 |
++----+------------+----------+-------------+----------+-------------+---------------------+
+
+mysql> SELECT d.pedido_id, p.nombre, d.cantidad, d.precio_unitario, d.subtotal FROM detalle_pedido d JOIN producto p ON p.id = d.producto_id WHERE d.pedido_id = 15
++-----------+--------------+----------+-----------------+----------+
+| pedido_id | nombre       | cantidad | precio_unitario | subtotal |
++-----------+--------------+----------+-----------------+----------+
+|        15 | Arroz blanco |        2 |         4900.00 |  9800.00 |
+|        15 | Café molido  |        1 |        21500.00 | 21500.00 |
++-----------+--------------+----------+-----------------+----------+
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    78 |
+| 27 | Café molido  | 500 g  |    15 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+# Regla: un pedido CONFIRMADO ya no se modifica
+
+>>> tools/call agregarProductoAPedido {"pedidoId": 15, "productoId": 21, "cantidad": 1}
+<<< isError=true
+El pedido 15 está en estado CONFIRMADO y ya no se puede modificar. Solo se modifican pedidos en BORRADOR.
+
+====================================================================================================
+6. cancelarPedido: el pedido CONFIRMADO pasa a CANCELADO y se devuelve el stock
+====================================================================================================
+
+>>> tools/call cancelarPedido {"pedidoId": 15}
+<<< isError=false
+{
+  "id": 15,
+  "estado": "CANCELADO",
+  "clienteId": 4,
+  "cliente": "María Fernanda Ruiz",
+  "direccionEntrega": "Calle 33 # 65-10, Medellín",
+  "productos": [
+    {
+      "productoId": 21,
+      "producto": "Arroz blanco",
+      "unidad": "1 kg",
+      "cantidad": 2,
+      "precioUnitario": 4900.0,
+      "subtotal": 9800.0
+    },
+    {
+      "productoId": 27,
+      "producto": "Café molido",
+      "unidad": "500 g",
+      "cantidad": 1,
+      "precioUnitario": 21500.0,
+      "subtotal": 21500.0
+    }
+  ],
+  "subtotal": 31300.0,
+  "costoEnvio": 5000.0,
+  "total": 36300.0,
+  "metodoPago": "EFECTIVO",
+  "creadoEn": "2026-11-16T02:44:04",
+  "confirmadoEn": "2026-11-16T02:44:05"
+}
+
+mysql> SELECT id, estado, total FROM pedido WHERE id = 15
++----+-----------+----------+
+| id | estado    | total    |
++----+-----------+----------+
+| 15 | CANCELADO | 36300.00 |
++----+-----------+----------+
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    80 |
+| 27 | Café molido  | 500 g  |    16 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+# Regla: un pedido CANCELADO no se cancela otra vez (no se devuelve stock dos veces)
+
+>>> tools/call cancelarPedido {"pedidoId": 15}
+<<< isError=true
+El pedido 15 está en estado CANCELADO y ya no se puede cancelar.
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    80 |
+| 27 | Café molido  | 500 g  |    16 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+PEDIDO_ID=15

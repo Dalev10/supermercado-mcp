@@ -1,0 +1,48 @@
+# Fase 4 - Estado en MySQL despues de confirmarPedido sobre el pedido 15 (extraido de f4-plan-pruebas.txt, paso 5)
+# Stock antes de confirmar: Arroz blanco 80, Cafe molido 16, Gaseosa cola 1
+
+mysql> SELECT id, estado, subtotal, costo_envio, total, metodo_pago, confirmado_en FROM pedido WHERE id = 15
++----+------------+----------+-------------+----------+-------------+---------------------+
+| id | estado     | subtotal | costo_envio | total    | metodo_pago | confirmado_en       |
++----+------------+----------+-------------+----------+-------------+---------------------+
+| 15 | CONFIRMADO | 31300.00 |     5000.00 | 36300.00 | EFECTIVO    | 2026-11-16 02:44:05 |
++----+------------+----------+-------------+----------+-------------+---------------------+
+
+mysql> SELECT d.pedido_id, p.nombre, d.cantidad, d.precio_unitario, d.subtotal FROM detalle_pedido d JOIN producto p ON p.id = d.producto_id WHERE d.pedido_id = 15
++-----------+--------------+----------+-----------------+----------+
+| pedido_id | nombre       | cantidad | precio_unitario | subtotal |
++-----------+--------------+----------+-----------------+----------+
+|        15 | Arroz blanco |        2 |         4900.00 |  9800.00 |
+|        15 | Café molido  |        1 |        21500.00 | 21500.00 |
++-----------+--------------+----------+-----------------+----------+
+
+mysql> SELECT id, nombre, unidad, stock FROM producto WHERE id IN (21, 27, 31)
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    78 |
+| 27 | Café molido  | 500 g  |    15 |
+| 31 | Gaseosa cola | 1.5 L  |     1 |
++----+--------------+--------+-------+
+
+
+# Pedido 16: preparado por JSON-RPC y confirmado desde MCP Inspector (captura f4-inspector-confirmar.png)
+# Stock antes de confirmar: Arroz blanco 80, Cafe molido 16
+
++----+------------+----------+-------------+----------+-------------+---------------------+
+| id | estado     | subtotal | costo_envio | total    | metodo_pago | confirmado_en       |
++----+------------+----------+-------------+----------+-------------+---------------------+
+| 16 | CONFIRMADO | 31300.00 |     5000.00 | 36300.00 | EFECTIVO    | 2026-11-16 09:22:42 |
++----+------------+----------+-------------+----------+-------------+---------------------+
++-----------+--------------+----------+-----------------+----------+
+| pedido_id | nombre       | cantidad | precio_unitario | subtotal |
++-----------+--------------+----------+-----------------+----------+
+|        16 | Arroz blanco |        2 |         4900.00 |  9800.00 |
+|        16 | Café molido  |        1 |        21500.00 | 21500.00 |
++-----------+--------------+----------+-----------------+----------+
++----+--------------+--------+-------+
+| id | nombre       | unidad | stock |
++----+--------------+--------+-------+
+| 21 | Arroz blanco | 1 kg   |    78 |
+| 27 | Café molido  | 500 g  |    15 |
++----+--------------+--------+-------+
