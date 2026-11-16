@@ -471,3 +471,37 @@ Se ejecutó después de la Fase 5 por la ruta crítica acordada en D0.5.
 - **Decisión del estudiante:** a
 - **Justificación:** el objetivo de la fase, que el mismo servidor sirva a otros hosts sin cambiar código, queda demostrado con tres hosts con modelo (el chatbot con Gemini, Claude Code y Claude Desktop) más el Inspector. Las consultas reales se hicieron desde Claude Code y se comprobaron en el registro del servidor y en MySQL.
 - **Consecuencias:** de Claude Desktop hay evidencia de conexión (`f6-claude-desktop-registro.txt`) pero no de consultas; queda anotado como alcance no capturado.
+
+## Fase 9. Entregable final
+
+**Guía recibida:** el estudiante entregó como guía el informe del Laboratorio 2 del mismo curso (`Informe_Laboratorio_2_CICD.docx.pdf`). No es un enunciado con requisitos, sino un informe modelo, y se usa como plantilla de forma: artículo a dos columnas hecho en Word, portada a una columna con título en español e inglés, autores, enlaces y facultad; Resumen y Palabras clave; secciones 1 a 7 (Introducción, Objetivo general, Objetivos específicos, Herramientas, Arquitectura propuesta, Procedimiento numerado 6.x.y en orden de ejecución, Conclusiones) y Referencias en estilo tipo APA; figuras, tablas y listados numerados con pie en cursiva; unas 15 páginas. No indica criterios de evaluación, fecha ni medio de entrega.
+
+### D9.1 Formato y herramienta del informe
+- **Fecha:** 2026-11-16
+- **Fase:** 9
+- **Opciones consideradas:** a) Word `.docx` a dos columnas generado con la librería `docx` de Node, instalada solo en una carpeta temporal; b) PDF directo desde HTML con Chrome; c) Word y conversión automática a PDF instalando LibreOffice
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** imita el formato del modelo (hecho en Word) y queda editable.
+- **Consecuencias:** el estudiante exporta el PDF desde Word o Google Docs. Sin LibreOffice, la revisión visual se hace sobre ese PDF exportado.
+
+### D9.2 Figuras
+- **Fecha:** 2026-11-16
+- **Fase:** 9
+- **Opciones consideradas:** a) diagramas Mermaid exportados a imagen más capturas de GitHub; b) solo diagramas; c) solo lo existente
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Consecuencias:** los diagramas de componentes, entidad-relación, estados y secuencia se exportan a PNG con Chrome; se agregan el grafo de ramas y la lista de pull requests de GitHub.
+
+### D9.3 Nivel de detalle del código
+- **Fecha:** 2026-11-16
+- **Fase:** 9
+- **Opciones consideradas:** a) extractos clave numerados; b) mínimo; c) amplio con anexos
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Consecuencias:** entre 5 y 7 listados cortos; el resto se remite al repositorio.
+
+### D9.4 Índice
+- **Fecha:** 2026-11-16
+- **Fase:** 9
+- **Decisión del estudiante:** aprobó el índice propuesto, que sigue la estructura del modelo y el orden real de ejecución, con una extensión objetivo de 13 a 16 páginas.

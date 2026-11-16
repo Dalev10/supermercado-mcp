@@ -425,3 +425,21 @@ cd ../chatbot-client && ./mvnw test
 **Problemas y solución:** una sesión de Claude Code abierta antes de crear `.mcp.json` no ve el servidor. Solución: iniciar una sesión nueva en la carpeta del proyecto (anotado en el README).
 
 **Evidencias:** `f6-claude-code-mcp.txt`, `f6-claude-code-consulta.txt`, `f6-claude-code-categorias.png`, `f6-claude-code-pedido.png`
+
+## Fase 9. Informe final (2026-11-16, en revisión)
+
+**Guía recibida:** el informe del Laboratorio 2 del mismo curso, usado como modelo de forma (ver la introducción de la Fase 9 en `DECISIONES.md`).
+
+**Qué se hizo:**
+
+1. Se exportaron a PNG, con Chrome sin interfaz, los diagramas Mermaid de componentes, entidad-relación, estados y secuencia de un pedido; se generó la figura del grafo de ramas desde `git log --graph main` y se capturó la lista pública de Pull Requests en GitHub.
+2. Se redactó el informe con la estructura aprobada (D9.4), a partir de la bitácora, las decisiones y las evidencias, y se generó `docs/entregable/Informe_Laboratorio_MCP.docx`: tamaño carta, portada a una columna, cuerpo a dos columnas, 14 figuras, 8 tablas y 6 listados.
+3. Se comprobó que el XML del documento es válido, que las 14 imágenes están enlazadas y que no contiene secretos, rutas personales ni correos.
+
+**Problemas y solución:**
+
+- Mermaid limita el ancho de los diagramas al del contenedor y salían con poca resolución; se desactivó `useMaxWidth`.
+- GitHub carga la lista de Pull Requests a medida que se desplaza la página; se amplió la altura de la ventana de captura y se recortó el espacio en blanco.
+- Sin LibreOffice no se puede convertir el `.docx` a PDF en la máquina; la revisión visual se hace sobre el PDF que exporte el estudiante desde Word o Google Docs (D9.1).
+
+**Evidencias:** `docs/entregable/Informe_Laboratorio_MCP.docx`, `docs/entregable/figuras/`
