@@ -379,3 +379,86 @@ Se ejecutó después de la Fase 5 por la ruta crítica acordada en D0.5.
 - **Decisión del estudiante:** b
 - **Justificación:** ahorrar tiempo al estudiante.
 - **Consecuencias:** las capturas del chatbot y del Inspector se tomaron con Google Chrome en modo headless (perfil temporal) manejado por el protocolo DevTools desde un script de Node, sin instalar nada. Son capturas de las aplicaciones reales en ejecución. Las de Claude Desktop (Fase 6) no se pueden automatizar así y siguen a cargo del estudiante.
+
+## Fase 6. Claude Desktop y Claude Code como hosts adicionales
+
+### Alcance de la Fase 6
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Opciones consideradas:** a) dejar Claude Desktop como alcance pendiente; b) instalarlo y hacer la demostración
+- **Recomendación de Claude Code:** a, porque la fecha de entrega ya había pasado y era lo último de la ruta crítica
+- **Decisión del estudiante:** b. Después pidió que la instalación la hiciera Claude Code desde la terminal, escribiendo él mismo la contraseña de sudo.
+- **Justificación:** completar la demostración de interoperabilidad que pide el laboratorio.
+- **Consecuencias:** se instaló Claude Desktop 5.11492.5 (beta para Linux) desde el repositorio apt oficial de Anthropic, siguiendo https://code.claude.com/docs/en/desktop-linux. Antes de instalar la llave del repositorio se verificó su huella (`31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE`). La contraseña de sudo la escribió el estudiante en una ventana de `zenity` (`SUDO_ASKPASS`); Claude Code nunca la vio. El paquete instaló también dependencias de QEMU que usa la función Cowork de la app.
+
+### D6.1 Forma de conexión de Claude Desktop
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Opciones consideradas:** a) puente `mcp-remote` en el archivo de configuración, como la Parte D del PDF; b) mecanismo HTTP nativo, si la versión lo admitiera para servidores locales
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a (aceptada al elegir "Instalarlo y hacerlo", cuya descripción indicaba `mcp-remote` y el nombre `supermercado-mcp`)
+- **Justificación:** el archivo de configuración de Claude Desktop lanza servidores por STDIO; `mcp-remote` traduce STDIO a Streamable HTTP hacia el servidor local.
+- **Consecuencias:** como Node viene de nvm y la aplicación no carga ese `PATH`, la configuración usa rutas absolutas a `node` y `npx` y define `PATH` en `env`. Antes de tocar la aplicación se probó el puente con un entorno limpio (`f6-mcp-remote-stdio.txt`). Con la confirmación del estudiante se creó `~/.config/Claude/claude_desktop_config.json`, que no existía.
+
+### D6.2 Nombre del conector
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Decisión:** `supermercado-mcp`, igual en Claude Desktop, en `.mcp.json` y en la documentación (aceptada junto con D6.1).
+- **Justificación:** evitar la inconsistencia del PDF, que usa un nombre en el JSON y otro en la captura.
+
+### D6.3 Claude Code como tercer host
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Opciones consideradas:** a) sí, con `claude mcp add --transport http --scope project`; b) no
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** es un solo comando, aporta evidencia de un tercer host y quien clone el repositorio obtiene la conexión.
+- **Consecuencias:** `.mcp.json` en la raíz del repositorio. Claude Code pide aprobar el servidor la primera vez; esa aprobación la hace el usuario.
+
+## Fase 7. Pruebas integrales
+
+### D7.1 Pruebas del chatbot
+- **Fecha:** 2026-11-16
+- **Fase:** 7
+- **Opciones consideradas:** a) manuales con guion y capturas; b) añadir una prueba automatizada del controlador con el `ChatClient` simulado
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** las respuestas de un modelo no son deterministas y automatizarlas bien excede el alcance. La lógica propia del chatbot (traducción de errores y entrega de errores de herramienta) ya tiene 6 pruebas unitarias.
+- **Consecuencias:** guion manual en `docs/pruebas.md`, con las transcripciones y capturas de la Fase 5 como evidencia.
+
+## Fase 8. Documentación del repositorio
+
+### D8.1 Diagramas
+- **Fecha:** 2026-11-16
+- **Fase:** 8
+- **Opciones consideradas:** a) Mermaid dentro del Markdown; b) imágenes hechas en una herramienta externa
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** GitHub los renderiza, quedan versionados como texto y se pueden exportar a imagen para el entregable.
+- **Consecuencias:** diagramas de componentes, entidad-relación, estados del pedido y secuencia de un pedido en `docs/arquitectura.md`, y versiones resumidas en el README.
+
+### D8.2 Publicación
+- **Fecha:** 2026-11-16
+- **Fase:** 8
+- **Opciones consideradas:** a) tag `v1.0.0` y release en GitHub; b) sin tag
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** fija la versión exacta que se entrega.
+- **Consecuencias:** sin GitHub CLI, Claude Code crea y sube el tag con git (con confirmación) cuando todos los pull requests estén fusionados en `main`, y el estudiante crea el release en la web.
+
+### D8.3 Capturas en el repositorio
+- **Fecha:** 2026-11-16
+- **Fase:** 8
+- **Opciones consideradas:** a) incluirlas en `docs/evidencias/` y enlazarlas desde el README; b) solo en el entregable
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** quien abra el repositorio ve el proyecto funcionando sin ejecutarlo. Se revisó que ninguna muestre claves ni datos personales reales.
+- **Consecuencias:** el README muestra capturas del chatbot y del Inspector.
+
+### D6.4 Pasos de la Fase 6 que no se pudieron automatizar (no prevista en la guía)
+- **Fecha:** 2026-11-16
+- **Fase:** 6
+- **Contexto:** el estudiante pidió que Claude Code completara todo el proceso pendiente.
+- **Hallazgos:** el clasificador de seguridad de Claude Code bloqueó que el agente aprobara para sí mismo el servidor MCP del proyecto, y Claude Desktop se niega a arrancar con un puerto de depuración, que era la vía para escribir en la app y tomar capturas.
+- **Decisión:** respetar ambas protecciones y no buscar formas de rodearlas.
+- **Consecuencias:** la aprobación en Claude Code y las pruebas y capturas en Claude Desktop las hace el estudiante. Como evidencia automática de que Claude Desktop se conecta al servidor queda su propio registro (`f6-claude-desktop-registro.txt`).

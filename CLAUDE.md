@@ -67,3 +67,5 @@ cd chatbot-client && ./mvnw spring-boot:run
 - Nombre único del servidor MCP: `supermercado-mcp`.
 - Modelo de Gemini: `gemini-3.5-flash-lite`, configurable con la variable `GEMINI_MODEL` (decisión D5.2).
 - El chatbot necesita el servidor MCP arriba para arrancar; si el servidor MCP se reinicia, reiniciar también el chatbot.
+- Gemini en nivel gratuito: no hacer pruebas del chatbot en ráfaga (provoca 429 o llamadas sin respuesta); dejar unos segundos entre mensajes.
+- Claude Desktop (Linux) lee `~/.config/Claude/claude_desktop_config.json`; el conector usa rutas absolutas de nvm.

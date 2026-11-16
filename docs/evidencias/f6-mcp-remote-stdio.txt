@@ -1,0 +1,23 @@
+# Fase 6 - Puente mcp-remote 0.16.6: STDIO (lo que habla Claude Desktop) -> Streamable HTTP (lo que expone el servidor) (2026-11-16 09:28 -05)
+# Se ejecuto con un entorno limpio, sin el PATH de nvm, igual que lo lanzara Claude Desktop:
+$ env -i HOME="$HOME" PATH="<node>/bin:/usr/bin:/bin" <node>/bin/node <node>/bin/npx -y mcp-remote http://localhost:8888/mcp
+# Por la entrada estandar se enviaron, una por linea: initialize, notifications/initialized, tools/list y tools/call buscarProductos {texto: arroz}
+
+## Salida estandar (respuestas JSON-RPC que recibe el host)
+{"id": 1, "result": {"protocolVersion": "2025-06-18", "capabilities": {"completions": {}, "logging": {}, "prompts": {"listChanged": true}, "resources": {"subscribe": false, "listChanged": true}, "tools": {"listChanged": true}}, "serverInfo": {"name": "supermercado-mcp-server", "version": "1.0.0"}}}
+{"id": 2, "result": {"tools": ["agregarProductoAPedido", "buscarCliente", "cancelarPedido", "crearPedido", "quitarProductoDePedido", "listarCategorias", "registrarCliente", "buscarProductos", "confirmarPedido", "consultarPedido"], "nota": "se muestran solo los nombres"}}
+{"id": 3, "result": {"content": [{"type": "text", "text": "[{\"id\":21,\"nombre\":\"Arroz blanco\",\"unidad\":\"1 kg\",\"descripcion\":\"Arroz blanco de grano largo\",\"categoria\":\"Despensa\",\"precio\":4900.00,\"stock\":78,\"disponible\":true},{\"id\":22,\"nombre\":\"Arroz integral\",\"unidad\":\"1 kg\",\"descripcion\":\"Arroz integral de grano largo\",\"categoria\":\"Despensa\",\"precio\":6800.00,\"stock\":20,\"disponible\":true}]"}], "isError": false}}
+
+## Registro del puente (salida de error)
+Connecting to remote server: http://localhost:8888/mcp
+Using transport strategy: http-first
+Connected to remote server using StreamableHTTPClientTransport
+Local STDIO server running
+Proxy established successfully between local STDIO and remote StreamableHTTPClientTransport
+[Local→Remote] initialize
+[Remote→Local] 1
+[Local→Remote] notifications/initialized
+[Local→Remote] tools/list
+[Remote→Local] 2
+[Local→Remote] tools/call
+[Remote→Local] 3

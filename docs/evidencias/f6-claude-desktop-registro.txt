@@ -1,0 +1,23 @@
+# Fase 6 - Registro de Claude Desktop 5.11492.5 al conectar el conector supermercado-mcp (2026-11-16 10:21 -05)
+# Fuente: ~/.config/Claude/logs/mcp-server-supermercado-mcp.log (tramo de la ultima conexion; marcas de tiempo en UTC)
+# Claude Desktop lanza mcp-remote por STDIO; el puente reenvia cada mensaje por Streamable HTTP a http://localhost:8888/mcp
+
+2026-11-16T15:20:51.221Z [supermercado-mcp] [info] Using MCP server command: ~/.nvm/versions/node/v22.22.3/bin/node with path: {
+2026-11-16T15:20:51.228Z [supermercado-mcp] [info] Server started and connected successfully
+[256340] Using transport strategy: http-first
+[256340] Connected to remote server using StreamableHTTPClientTransport
+[256340] Local STDIO server running
+[256340] Proxy established successfully between local STDIO and remote StreamableHTTPClientTransport
+2026-11-16T15:20:52.336Z [supermercado-mcp] [info] Message from client: method="initialize" id=0 params
+2026-11-16T15:20:52.345Z [supermercado-mcp] [info] Message from server: id=0 result
+2026-11-16T15:20:52.364Z [supermercado-mcp] [info] Message from client: method="notifications/initialized"
+2026-11-16T15:20:52.371Z [supermercado-mcp] [info] Message from client: method="tools/list" id=1 params
+2026-11-16T15:20:52.371Z [supermercado-mcp] [info] Message from client: method="prompts/list" id=2 params
+2026-11-16T15:20:52.372Z [supermercado-mcp] [info] Message from client: method="resources/list" id=3
+2026-11-16T15:20:52.385Z [supermercado-mcp] [info] Message from server: id=2 result
+2026-11-16T15:20:52.389Z [supermercado-mcp] [info] Message from server: id=1 result
+2026-11-16T15:20:52.390Z [supermercado-mcp] [info] Message from server: id=3 result
+[256407] Using transport strategy: http-first
+[256407] Connected to remote server using StreamableHTTPClientTransport
+[256407] Local STDIO server running
+[256407] Proxy established successfully between local STDIO and remote StreamableHTTPClientTransport
