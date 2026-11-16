@@ -65,3 +65,5 @@ cd chatbot-client && ./mvnw spring-boot:run
 
 - Paquete base `com.udea.supermercado` (chatbot: `com.udea.supermercado.chatbot`), dominio en español.
 - Nombre único del servidor MCP: `supermercado-mcp`.
+- Modelo de Gemini: `gemini-3.5-flash-lite`, configurable con la variable `GEMINI_MODEL` (decisión D5.2).
+- El chatbot necesita el servidor MCP arriba para arrancar; si el servidor MCP se reinicia, reiniciar también el chatbot.
