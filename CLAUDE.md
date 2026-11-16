@@ -4,7 +4,7 @@ Chatbot de pedidos de supermercado sobre un servidor MCP. La especificación com
 
 ## Al retomar una sesión
 
-Relee `GUIA_DESARROLLO.md`, `docs/DECISIONES.md` y `docs/BITACORA.md`, y ejecuta `git log --oneline --all` para saber en qué fase quedó el trabajo.
+Relee `GUIA_DESARROLLO.md`, `docs/DECISIONES.md` y `docs/BITACORA.md` (los tres son archivos locales, no versionados), y ejecuta `git log --oneline --all` para saber en qué fase quedó el trabajo.
 
 ## Reglas de trabajo (sección 3 de la guía)
 
@@ -65,7 +65,7 @@ cd chatbot-client && ./mvnw spring-boot:run
 
 - Paquete base `com.udea.supermercado` (chatbot: `com.udea.supermercado.chatbot`), dominio en español.
 - Nombre único del servidor MCP: `supermercado-mcp`.
-- Modelo de Gemini: `gemini-3.5-flash-lite`, configurable con la variable `GEMINI_MODEL` (decisión D5.2).
+- Modelo de Gemini: `gemini-3.5-flash-lite`, configurable con la variable `GEMINI_MODEL`.
 - El chatbot necesita el servidor MCP arriba para arrancar; si el servidor MCP se reinicia, reiniciar también el chatbot.
 - Gemini en nivel gratuito: no hacer pruebas del chatbot en ráfaga (provoca 429 o llamadas sin respuesta); dejar unos segundos entre mensajes.
 - Claude Desktop (Linux) lee `~/.config/Claude/claude_desktop_config.json`; el conector usa rutas absolutas de nvm.

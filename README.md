@@ -298,10 +298,9 @@ Un despliegue real necesitaría además TLS, autenticación y autorización del 
 
 ## 10. Documentación del proceso
 
-El enunciado pide explicar cada paso. El proceso completo está registrado en:
+El enunciado pide explicar cada paso. La explicación y su respaldo están en:
 
-- [docs/BITACORA.md](docs/BITACORA.md): qué se hizo en cada fase, por qué, con qué comandos, qué resultó y qué problemas aparecieron.
-- [docs/DECISIONES.md](docs/DECISIONES.md): cada decisión con sus opciones, la recomendación y la justificación.
+- [docs/entregable/Informe_Laboratorio_MCP.docx](docs/entregable/Informe_Laboratorio_MCP.docx): informe final, que explica cada paso del desarrollo.
 - [docs/arquitectura.md](docs/arquitectura.md): diagramas de componentes, secuencia y entidad-relación; comparación de hosts; seguridad.
 - [docs/pruebas.md](docs/pruebas.md): tabla de pruebas integrales y guion del chatbot.
 - [docs/evidencias/](docs/evidencias/): salidas de terminal y capturas, con prefijo de fase.
