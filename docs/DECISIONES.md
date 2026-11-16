@@ -224,3 +224,59 @@ Cada decisión del proyecto queda aquí con sus opciones, la recomendación de C
 - **Decisión del estudiante:** b
 - **Justificación:** es un documento de trabajo interno, no parte del producto que se entrega.
 - **Consecuencias:** el archivo se conserva en la máquina local y deja de aparecer en el repositorio desde la rama `fase-2-base-de-datos`. Sigue existiendo en el historial (commit inicial de `main`); borrarlo también de ahí exige reescribir el historial y un `git push --force`, que requieren confirmación explícita.
+
+## Fase 3. Servidor MCP
+
+### D3.1 Catálogo de herramientas
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) las 10 herramientas propuestas; b) las 10 más `listarPedidosDeCliente`; c) otro cambio
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** cubren el flujo completo de un pedido y entran en el alcance de 8 a 10 herramientas (T4); con pocas horas, cada herramienta extra es código, descripción y prueba adicionales.
+- **Consecuencias:** se publican `listarCategorias`, `buscarProductos`, `buscarCliente`, `registrarCliente`, `crearPedido`, `agregarProductoAPedido`, `quitarProductoDePedido`, `consultarPedido`, `confirmarPedido` y `cancelarPedido`. No hay herramientas de administración (crear productos, cambiar precios), siguiendo la recomendación del PDF de publicar solo las operaciones necesarias. `listarPedidosDeCliente` queda como alcance pendiente.
+
+### D3.2 Organización del código
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) clase `SupermercadoTools` delgada que delega en servicios de dominio; b) todo en una clase, como `TareaToolsService` del laboratorio
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** las reglas de negocio se prueban sin MCP y la capa de herramientas queda como un adaptador del protocolo.
+- **Consecuencias:** paquetes `model`, `repository`, `dto`, `exception`, `service` (`CatalogoService`, `ClienteService`, `PedidoService`) y `tools`. Las transacciones viven en los servicios.
+
+### D3.3 Qué devuelven las herramientas
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) DTO como `record` de Java; b) entidades JPA directamente, como el laboratorio
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** evita errores de carga perezosa y ciclos al serializar entidades con relaciones, y controla qué ve el modelo (no se exponen campos internos como `version`).
+- **Consecuencias:** `CategoriaDto`, `ProductoDto`, `ClienteDto`, `PedidoDto` y `DetalleDto`. La conversión se hace dentro de la transacción del servicio. Las fechas viajan como texto ISO.
+
+### D3.4 Registro de herramientas
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) bean `ToolCallbackProvider` construido con `MethodToolCallbackProvider`; b) anotaciones `@McpTool` con autoescaneo
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** es el mecanismo que enseña el PDF del laboratorio.
+- **Consecuencias:** el bean se declara en `SupermercadoMcpApplication`; al arrancar, el log muestra "Registered tools: 10".
+
+### D3.5 Errores de negocio
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) excepciones de dominio con mensajes claros en español; b) objetos resultado con un campo `exito`
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el mensaje llega al modelo como resultado de error y este puede explicarlo y proponer alternativas; además, una excepción revierte la transacción sin código adicional.
+- **Consecuencias:** una única excepción `ReglaNegocioException`. Se comprobó con llamadas reales (`docs/evidencias/f3-error-negocio.txt`) que en Spring AI 1.1.8 el error llega al cliente como un resultado normal de `tools/call` con `"isError": true` y el mensaje en `content[0].text`, no como un error JSON-RPC.
+
+### D3.6 Pruebas automatizadas
+- **Fecha:** 2026-11-15
+- **Fase:** 3
+- **Opciones consideradas:** a) unitarias con Mockito más una de integración con Testcontainers; b) solo unitarias con JUnit 5 y Mockito; c) `@DataJpaTest` con H2
+- **Recomendación de Claude Code:** b, por el tiempo disponible (D0.5)
+- **Decisión del estudiante:** b
+- **Justificación:** son rápidas, no dependen de la base de datos y cubren cada regla de negocio; es la opción que la guía aconseja con tiempo corto.
+- **Consecuencias:** 39 pruebas en `PedidoServiceTest` y `ClienteServiceTest`. Se eliminó la prueba `contextLoads` generada por Initializr porque exige la base de datos encendida. La integración real con MySQL se verifica a mano en la Fase 4. La prueba con Testcontainers queda como alcance pendiente.

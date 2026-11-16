@@ -128,3 +128,60 @@ docker compose exec mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" super
 **Evidencias:** `docs/evidencias/f2-tablas.txt`
 
 **Commit:** `ce87761` en la rama `fase-2-base-de-datos`
+
+## Fase 3. Servidor MCP (2026-11-15)
+
+**Qué se hizo:**
+
+1. Entidades JPA (`Categoria`, `Producto`, `Cliente`, `Pedido`, `DetallePedido`) y enumeraciones `EstadoPedido` y `MetodoPago`, que corresponden al esquema de `db/init/01-schema.sql`.
+2. Repositorios Spring Data JPA, con una consulta de búsqueda de productos por texto, categoría y disponibilidad.
+3. Servicios de dominio con las reglas de negocio y las transacciones: `CatalogoService`, `ClienteService` y `PedidoService`.
+4. DTO como `record` para las respuestas.
+5. Clase `SupermercadoTools` con las 10 herramientas `@Tool`, cada una con una descripción que dice qué hace, cuándo usarla, qué devuelve y cuándo falla.
+6. Registro de las herramientas con `MethodToolCallbackProvider` y configuración del transporte Streamable HTTP en `application.properties`.
+7. 39 pruebas unitarias con JUnit 5 y Mockito.
+
+**Por qué:**
+
+- La capa de herramientas es un adaptador delgado: recibe la llamada MCP y delega. Las reglas viven en los servicios, donde se prueban sin protocolo ni base de datos.
+- El servidor valida todo lo que recibe (cantidades, teléfono, campos obligatorios, método de pago) porque los argumentos los produce un modelo de lenguaje y no se puede confiar en ellos.
+- Al confirmar, primero se validan todas las líneas y solo después se descuenta el stock, de modo que si una línea falla no se toca ninguna. Todo ocurre en una transacción.
+- `Producto` y `Pedido` usan bloqueo optimista (`@Version`) para que dos confirmaciones simultáneas no vendan la misma unidad.
+- El servidor escucha solo en `127.0.0.1` porque el endpoint MCP no tiene autenticación.
+
+**Reglas de negocio y su prueba:**
+
+| Regla | Prueba |
+|---|---|
+| La cantidad debe ser mayor que cero | `agregarFallaSiLaCantidadNoEsMayorQueCero` |
+| El producto debe existir y estar activo | `agregarFallaSiElProductoNoExiste`, `agregarFallaSiElProductoEstaInactivo` |
+| Agregar un producto repetido suma a la misma línea y copia el precio | `agregarElMismoProductoSumaLaCantidadEnUnaSolaLinea`, `agregarCopiaElPrecioYCalculaTotalesConEnvio` |
+| No se modifica un pedido que no esté en `BORRADOR` | `noSeModificaUnPedidoQueNoEstaEnBorrador` |
+| No se confirma un pedido vacío | `confirmarFallaSiElPedidoEstaVacio` |
+| Confirmar descuenta stock y calcula subtotal, envío y total | `confirmarDescuentaStockYCalculaElTotal` |
+| Si falla una línea no se descuenta ninguna | `confirmarConStockInsuficienteNoDescuentaNingunaLinea` |
+| Método de pago válido | `confirmarFallaConMetodoDePagoDesconocido` |
+| Cancelar un pedido `CONFIRMADO` devuelve el stock | `cancelarUnPedidoConfirmadoDevuelveElStock` |
+| No se cancela un pedido `EN_CAMINO`, `ENTREGADO` o ya `CANCELADO` | `noSeCancelaUnPedidoEnCaminoEntregadoOYaCancelado` |
+| Teléfono único y con formato válido; campos obligatorios | `registrarFallaSiElTelefonoYaExiste`, `registrarFallaConTelefonoInvalido`, `registrarFallaSinNombreOSinDireccion` |
+
+**Comandos:**
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+cd mcp-server && ./mvnw clean test
+
+set -a && source ../.env && set +a
+./mvnw spring-boot:run
+```
+
+**Resultado:** `./mvnw clean test` termina en `BUILD SUCCESS` con 39 pruebas y ningún fallo. El servidor arranca en `127.0.0.1:8888`, se conecta a MySQL, Hibernate valida el esquema sin errores y el log muestra "Registered tools: 10". Una comprobación rápida con curl confirmó el handshake `initialize`, la lista de 10 herramientas y una búsqueda real de productos.
+
+**Problemas y solución:**
+
+- Riesgo previsto con `ddl-auto=validate`: Hibernate 6 espera por defecto un tipo `ENUM` nativo de MySQL para los `enum` de Java, mientras que el esquema usa `VARCHAR` con una restricción `CHECK`. Solución: anotar `estado` y `metodoPago` con `@JdbcTypeCode(SqlTypes.VARCHAR)`. Por la misma razón el campo booleano `activo` se definió como `BIT(1)`, que es el tipo que Hibernate espera en MySQL.
+- La prueba `contextLoads` generada por Initializr exige la base de datos encendida. Solución: se eliminó, porque se decidió hacer solo pruebas unitarias (D3.6).
+
+**Evidencias:** `docs/evidencias/f3-arranque.txt`, `docs/evidencias/f3-pruebas.txt`, `docs/evidencias/f3-error-negocio.txt`
+
+**Commit:** `d2fe34b` en la rama `fase-3-servidor-mcp`
