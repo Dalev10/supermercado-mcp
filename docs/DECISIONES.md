@@ -141,3 +141,77 @@ Cada decisión del proyecto queda aquí con sus opciones, la recomendación de C
 - **Decisión del estudiante:** a
 - **Justificación:** es material del profesor con capturas de su equipo, y un archivo subido a un repositorio público no se puede retirar del todo. No hace falta redistribuirlo para entender el proyecto.
 - **Consecuencias:** `docs/referencia/` queda ignorado por git; el README cita el laboratorio y enlaza los repositorios públicos del profesor.
+
+## Fase 2. Base de datos y modelo de datos
+
+### D2.1 Puerto de MySQL en el host
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) 3306; b) 3307 en el host hacia 3306 del contenedor
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el puerto 3306 está libre en la máquina (los otros contenedores usan 1521 y 5434) y es el mismo del laboratorio.
+- **Consecuencias:** se publica solo en `127.0.0.1`. El puerto sigue siendo configurable con `DB_PORT` en `.env`.
+
+### D2.2 Versión de la imagen
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) `mysql:8.4`; b) `mysql:8.0`; c) `mysql:latest`
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** 8.4 es la serie LTS de MySQL 8 y una etiqueta concreta hace el entorno reproducible; `latest` apunta a otra serie mayor.
+- **Consecuencias:** quien clone el repositorio obtiene el mismo motor.
+
+### D2.3 Gestión del esquema
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) scripts SQL en `db/init/` con `ddl-auto=validate`; b) Flyway; c) `ddl-auto=update` como el laboratorio
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el esquema queda explícito y versionado en una sola fuente de verdad, sirve directamente para el informe y Hibernate avisa al arrancar si las entidades no coinciden. Evita la inconsistencia del PDF, donde `ddl-auto=update` convive con un `schema.sql` manual.
+- **Consecuencias:** los scripts solo se ejecutan cuando el volumen está vacío; para recargarlos hay que borrar el volumen (`docker compose down -v`), acción destructiva que requiere confirmación.
+
+### D2.4 Dónde vive el carrito
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) el pedido nace en `BORRADOR` y se le agregan o quitan productos con herramientas; b) una sola herramienta `crearPedido` con la lista completa
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el estado queda en la base de datos y no en la memoria del modelo, así que no se pierde ni se inventa; permite una conversación natural y el mismo pedido es visible desde otro host.
+- **Consecuencias:** se necesita el estado `BORRADOR` y tres herramientas más (agregar, quitar y consultar).
+
+### D2.5 Identificación del cliente
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) número de teléfono, único; b) correo electrónico; c) documento de identidad
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** es el dato natural en un domicilio y fácil de dictar en un chat; el documento es más sensible sin beneficio para la práctica.
+- **Consecuencias:** `cliente.telefono` tiene restricción `UNIQUE`; el formato se valida en el servidor.
+
+### D2.6 Dinero y costo de envío
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** precios en `DECIMAL(12,2)` / `BigDecimal` en pesos colombianos. Envío: a) tarifa fija configurable por propiedad; b) sin costo de envío; c) gratis a partir de un monto mínimo
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** `double` no representa dinero con exactitud. La tarifa fija es simple, visible en el total y se cambia sin tocar código.
+- **Consecuencias:** propiedad `supermercado.costo-envio=5000` en el servidor; `pedido` guarda `subtotal`, `costo_envio` y `total`.
+
+### D2.7 Momento de descontar el stock
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) al confirmar el pedido, en una transacción y con bloqueo optimista (`@Version`) en `Producto`; b) al agregar al borrador
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** los borradores abandonados no retienen inventario y se evita vender dos veces la misma unidad.
+- **Consecuencias:** se puede agregar a un borrador más cantidad de la disponible; el error de stock aparece al confirmar. `producto` y `pedido` tienen columna `version`, y la base refuerza la regla con `CHECK (stock >= 0)`.
+
+### D2.8 Datos de prueba
+- **Fecha:** 2026-11-15
+- **Fase:** 2
+- **Opciones consideradas:** a) 6 categorías, unos 30 productos y 2 clientes; b) conjunto mínimo (3 categorías, 10 productos, 1 cliente)
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** da variedad suficiente para las demostraciones y capturas e incluye casos para probar validaciones.
+- **Consecuencias:** 32 productos genéricos (sin marcas) con precios verosímiles en COP: 2 agotados, 3 con stock de 3 unidades o menos y 1 inactivo. Dos clientes ficticios, uno con el teléfono 3001234567 del guion de prueba. Todos los datos son sintéticos.

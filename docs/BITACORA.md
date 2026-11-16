@@ -92,3 +92,39 @@ cd ../chatbot-client && ./mvnw -q -DskipTests package
 **Evidencias:** `docs/evidencias/f1-compilacion.txt`
 
 **Commit:** `70150e2` en la rama `fase-1-andamiaje`
+
+## Fase 2. Base de datos y modelo de datos (2026-11-15)
+
+**Qué se hizo:**
+
+1. Se escribió `docker-compose.yml` con MySQL 8.4, publicado solo en `127.0.0.1:3306`, con volumen persistente, zona horaria `America/Bogota` y verificación de salud.
+2. Se escribió el esquema en `db/init/01-schema.sql` (tablas `categoria`, `producto`, `cliente`, `pedido` y `detalle_pedido`) y los datos de prueba en `db/init/02-data.sql`.
+3. Se creó el archivo `.env` local a partir de `.env.example`, con contraseñas de MySQL generadas al azar.
+4. Se levantó el contenedor y se comprobó el contenido de la base con el usuario de aplicación.
+
+**Por qué:**
+
+- Docker Compose hace el entorno reproducible: quien clone el repositorio obtiene la misma base con un solo comando.
+- El esquema vive en scripts SQL explícitos y versionados (D2.3), no lo genera Hibernate.
+- Frente al laboratorio base se corrigió lo siguiente: la aplicación no se conecta como `root` sino con un usuario que solo tiene permisos sobre `supermercado_mcp`; las fechas son `DATETIME` y no `VARCHAR`; el dinero es `DECIMAL(12,2)`.
+- La base refuerza las reglas de negocio con restricciones: teléfono único, una sola línea por producto en cada pedido, `CHECK` de stock no negativo, cantidad mayor que cero y estados válidos.
+- `detalle_pedido.precio_unitario` copia el precio del producto al agregarlo, para que un cambio de precio posterior no altere pedidos existentes.
+
+**Comandos:**
+
+```bash
+cp .env.example .env    # y cambiar las contraseñas
+docker compose up -d && docker compose ps
+docker compose exec mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" supermercado_mcp -e "SHOW TABLES; SELECT COUNT(*) FROM producto;"'
+```
+
+**Resultado:** contenedor `supermercado-mysql` en estado `healthy`. La base tiene 5 tablas, 6 categorías, 32 productos y 2 clientes; los acentos se guardan bien (utf8mb4). El usuario `supermercado_app` solo tiene privilegios sobre `supermercado_mcp`, y un `UPDATE` que deja el stock en negativo es rechazado por la restricción `ck_producto_stock`.
+
+**Problemas y solución:**
+
+- El primer arranque falló con "Database is uninitialized and password option is not specified". Causa: en la carpeta existía un directorio vacío llamado `.env` en lugar del archivo, así que Docker Compose no encontró las variables. El directorio se creó durante la sesión de trabajo (probablemente por el entorno aislado en el que Claude Code ejecuta comandos), no contenía nada y se eliminó con `rmdir`. Después se creó el archivo `.env` real y el contenedor inicializó la base correctamente.
+- La verificación de salud de la referencia usaba `-h localhost` (socket), que puede reportar `healthy` mientras todavía corren los scripts de inicio. Se cambió a `-h 127.0.0.1` (TCP), que solo responde cuando el servidor definitivo está listo.
+
+**Evidencias:** `docs/evidencias/f2-tablas.txt`
+
+**Commit:** `ce87761` en la rama `fase-2-base-de-datos`
