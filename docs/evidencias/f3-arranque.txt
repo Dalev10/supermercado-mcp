@@ -1,0 +1,16 @@
+# Fase 3 - Arranque del servidor MCP (2026-11-15 22:53 -05)
+
+$ set -a && source .env && set +a
+$ cd mcp-server && ./mvnw spring-boot:run
+
+2026-11-15T22:53:07.810-05:00  INFO 61536 --- [supermercado-mcp] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-15T22:53:08.043-05:00  INFO 61536 --- [supermercado-mcp] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-15T22:53:08.711-05:00  INFO 61536 --- [supermercado-mcp] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-15T22:53:09.637-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Enable tools capabilities, notification: true
+2026-11-15T22:53:09.638-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Registered tools: 10
+2026-11-15T22:53:09.638-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Enable resources capabilities, notification: true
+2026-11-15T22:53:09.638-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Enable resources templates capabilities, notification: true
+2026-11-15T22:53:09.639-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Enable prompts capabilities, notification: true
+2026-11-15T22:53:09.639-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.a.m.s.c.a.McpServerAutoConfiguration : Enable completions capabilities
+2026-11-15T22:53:09.746-05:00  INFO 61536 --- [supermercado-mcp] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8888 (http) with context path '/'
+2026-11-15T22:53:09.751-05:00  INFO 61536 --- [supermercado-mcp] [main] c.u.s.SupermercadoMcpApplication         : Started SupermercadoMcpApplication in 3.561 seconds (process running for 3.749)

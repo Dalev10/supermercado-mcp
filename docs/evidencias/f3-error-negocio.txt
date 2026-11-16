@@ -1,0 +1,10 @@
+# Fase 3 - Como llega al cliente un error de negocio (decision D3.5) (2026-11-15 22:53 -05)
+
+# tools/call buscarCliente {"telefono":"3000000000"}  (telefono no registrado)
+{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"No hay ningún cliente registrado con el teléfono 3000000000. Pide nombre y dirección y regístralo con registrarCliente."}],"isError":true}}
+
+# tools/call confirmarPedido {"pedidoId":999,"metodoPago":"EFECTIVO"}  (pedido inexistente)
+{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"No existe el pedido con id 999."}],"isError":true}}
+
+# tools/call agregarProductoAPedido sin cantidad (parametro obligatorio ausente)
+{"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"La cantidad debe ser mayor que cero."}],"isError":true}}
