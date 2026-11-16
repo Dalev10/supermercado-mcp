@@ -348,3 +348,34 @@ Esta fase se ejecutó antes que la Fase 4 por la ruta crítica acordada en D0.5.
 - **Decisión del estudiante:** a
 - **Justificación:** nombre sencillo y tono adecuado para atención al cliente.
 - **Consecuencias:** el prompt de sistema está en `ChatConfig.PROMPT_SISTEMA`. Al texto aprobado se le añadió una regla ("Escribe en texto plano, sin Markdown; para las listas usa guiones") porque la página muestra el texto tal cual.
+
+## Fase 4. Verificación del protocolo MCP
+
+Se ejecutó después de la Fase 5 por la ruta crítica acordada en D0.5.
+
+### D4.1 Profundidad de la prueba con curl
+- **Fecha:** 2026-11-16
+- **Fase:** 4
+- **Opciones consideradas:** a) solo `initialize`, como en el PDF; b) secuencia completa `initialize` → `notifications/initialized` → `tools/list` → una `tools/call` de lectura
+- **Recomendación de Claude Code:** b
+- **Decisión del estudiante:** b
+- **Justificación:** muestra el JSON-RPC crudo de todo el ciclo (negociación, descubrimiento y ejecución), que es lo que el informe debe explicar.
+- **Consecuencias:** cuatro archivos `f4-curl-*.txt` con cada petición y su respuesta. Además se ejecutó por JSON-RPC el plan de pruebas completo de la guía (`f4-plan-pruebas.txt`), con un `SELECT` después de cada escritura.
+
+### D4.2 Versión del Inspector
+- **Fecha:** 2026-11-16
+- **Fase:** 4
+- **Opciones consideradas:** a) la más reciente (`npx @modelcontextprotocol/inspector`); b) la 0.12.0 que fija el PDF
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** tiene las correcciones actuales y soporta Streamable HTTP desde la interfaz.
+- **Consecuencias:** la versión instalada por `npx` fue la 2.13.0, cuya interfaz es distinta de la 0.12.0 de las capturas del PDF: los servidores se registran en una lista ("Add Servers") y se conectan con un interruptor, en lugar del formulario lateral con "Transport Type" y "URL". El Inspector guarda esa lista en `~/.mcp-inspector/mcp.json`, fuera del proyecto.
+
+### D4.3 Quién toma las capturas (no prevista en la guía)
+- **Fecha:** 2026-11-16
+- **Fase:** 4 y 5
+- **Opciones consideradas:** a) las toma el estudiante a mano, como indica la guía; b) las toma Claude Code de forma automatizada
+- **Recomendación de Claude Code:** no se consultó; fue una instrucción directa del estudiante ("realiza las capturas y guárdalas")
+- **Decisión del estudiante:** b
+- **Justificación:** ahorrar tiempo al estudiante.
+- **Consecuencias:** las capturas del chatbot y del Inspector se tomaron con Google Chrome en modo headless (perfil temporal) manejado por el protocolo DevTools desde un script de Node, sin instalar nada. Son capturas de las aplicaciones reales en ejecución. Las de Claude Desktop (Fase 6) no se pueden automatizar así y siguen a cargo del estudiante.

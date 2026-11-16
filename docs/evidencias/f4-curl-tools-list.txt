@@ -1,0 +1,220 @@
+# Fase 4 - Paso 3: tools/list (descubrimiento: nombre, descripcion y esquema JSON de cada herramienta)
+
+$ curl -s -X POST http://localhost:8888/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
+    -H "Mcp-Session-Id: <ID>" -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "tools": [
+      {
+        "name": "agregarProductoAPedido",
+        "description": "Agrega un producto a un pedido en BORRADOR y devuelve el pedido actualizado con subtotal, costo de envío y total. Si el producto ya estaba en el pedido, suma la cantidad a la existente. No descuenta inventario: el stock se valida al confirmar. Falla si el pedido ya no está en BORRADOR.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pedidoId": {
+              "type": "integer",
+              "description": "Id del pedido en BORRADOR"
+            },
+            "productoId": {
+              "type": "integer",
+              "description": "Id del producto, obtenido con buscarProductos"
+            },
+            "cantidad": {
+              "type": "integer",
+              "description": "Cantidad de unidades a agregar; entero mayor que cero"
+            }
+          },
+          "required": [
+            "pedidoId",
+            "productoId",
+            "cantidad"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "buscarCliente",
+        "description": "Busca un cliente registrado por su número de teléfono y devuelve su id, nombre, dirección y correo. Úsala al iniciar un pedido para identificar al usuario. Si no existe ningún cliente con ese teléfono devuelve un error: en ese caso ofrece registrarlo con registrarCliente.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "telefono": {
+              "type": "string",
+              "description": "Teléfono del cliente, de 7 a 10 dígitos, por ejemplo 3001234567"
+            }
+          },
+          "required": [
+            "telefono"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "cancelarPedido",
+        "description": "Cancela un pedido en estado BORRADOR o CONFIRMADO; si estaba CONFIRMADO devuelve los productos al inventario. Úsala solo después de que el usuario haya confirmado explícitamente que quiere cancelar. Falla si el pedido ya está EN_CAMINO, ENTREGADO o CANCELADO.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pedidoId": {
+              "type": "integer",
+              "description": "Id del pedido que se quiere cancelar"
+            }
+          },
+          "required": [
+            "pedidoId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "crearPedido",
+        "description": "Crea un pedido vacío en estado BORRADOR para un cliente y devuelve el pedido con su id. Es el primer paso para armar un pedido: después se agregan productos con agregarProductoAPedido. Crear el pedido no reserva ni descuenta inventario.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "clienteId": {
+              "type": "integer",
+              "description": "Id del cliente, obtenido con buscarCliente o registrarCliente"
+            },
+            "direccionEntrega": {
+              "type": "string",
+              "description": "Dirección de entrega de este pedido; si se omite se usa la dirección registrada del cliente"
+            }
+          },
+          "required": [
+            "clienteId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "quitarProductoDePedido",
+        "description": "Quita por completo un producto de un pedido en BORRADOR y devuelve el pedido actualizado. Para reducir la cantidad en lugar de eliminarlo, quítalo y agrégalo de nuevo con la cantidad correcta. Falla si el producto no está en el pedido o si el pedido ya no está en BORRADOR.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pedidoId": {
+              "type": "integer",
+              "description": "Id del pedido en BORRADOR"
+            },
+            "productoId": {
+              "type": "integer",
+              "description": "Id del producto que se quiere quitar"
+            }
+          },
+          "required": [
+            "pedidoId",
+            "productoId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "listarCategorias",
+        "description": "Lista las categorías de productos del supermercado con su id, nombre y descripción. Úsala cuando el usuario pregunte qué tipos de productos hay, o para obtener el id de una categoría antes de filtrar con buscarProductos.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "registrarCliente",
+        "description": "Registra un cliente nuevo y devuelve sus datos con el id asignado. Úsala solo cuando buscarCliente no encontró el teléfono y el usuario ya dio su nombre y su dirección. Falla si el teléfono ya está registrado o si algún dato no es válido.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "nombre": {
+              "type": "string",
+              "description": "Nombre completo del cliente"
+            },
+            "telefono": {
+              "type": "string",
+              "description": "Teléfono de 7 a 10 dígitos, sin indicativo de país. Debe ser único"
+            },
+            "direccion": {
+              "type": "string",
+              "description": "Dirección de entrega habitual, con ciudad"
+            },
+            "email": {
+              "type": "string",
+              "description": "Correo electrónico; es opcional"
+            }
+          },
+          "required": [
+            "nombre",
+            "telefono",
+            "direccion"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "buscarProductos",
+        "description": "Busca productos del catálogo y devuelve id, nombre, unidad de presentación, categoría, precio en pesos colombianos y stock disponible. Úsala siempre antes de ofrecer un producto, decir un precio o agregar algo a un pedido: es la única fuente válida de ids, precios y disponibilidad. Sin filtros devuelve todo el catálogo. Devuelve una lista vacía si nada coincide.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "texto": {
+              "type": "string",
+              "description": "Palabra a buscar en el nombre, la descripción o la categoría del producto, en singular y sin cantidades. Ejemplos: 'leche', 'arroz', 'huevo'"
+            },
+            "categoriaId": {
+              "type": "integer",
+              "description": "Id de una categoría obtenido con listarCategorias, para limitar la búsqueda a esa categoría"
+            },
+            "soloDisponibles": {
+              "type": "boolean",
+              "description": "true para devolver solo productos con stock mayor que cero; por defecto se incluyen también los agotados"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "confirmarPedido",
+        "description": "Confirma un pedido que está en estado BORRADOR: valida el stock de cada producto, lo descuenta del inventario y calcula el total con el costo de envío. Úsala solo después de que el usuario haya confirmado explícitamente el resumen del pedido. Si falta stock de algún producto falla sin descontar nada e indica qué producto y cuánto hay.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pedidoId": {
+              "type": "integer",
+              "description": "Id del pedido en borrador"
+            },
+            "metodoPago": {
+              "type": "string",
+              "description": "Método de pago: EFECTIVO, TARJETA o TRANSFERENCIA"
+            }
+          },
+          "required": [
+            "pedidoId",
+            "metodoPago"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "consultarPedido",
+        "description": "Consulta un pedido por su id y devuelve su estado (BORRADOR, CONFIRMADO, EN_CAMINO, ENTREGADO o CANCELADO), el cliente, la dirección de entrega, los productos con cantidades y precios, el subtotal, el costo de envío y el total. Úsala para mostrar el resumen antes de confirmar o cuando el usuario pregunte por un pedido.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pedidoId": {
+              "type": "integer",
+              "description": "Id del pedido"
+            }
+          },
+          "required": [
+            "pedidoId"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ]
+  }
+}
