@@ -1,0 +1,18 @@
+# Fase 5 - Telefono no registrado: el asistente ofrece registrar al cliente (2026-11-16 01:54 -05)
+# Peticiones POST /api/chat, las mismas que envia la pagina.
+
+USUARIO> Buenas, quiero pedir algo. Mi teléfono es 3205550101.
+MERCABOT> ¡Hola! No encontré un cliente registrado con ese número de teléfono. 
+
+Para poder ayudarte a hacer tu pedido, ¿me podrías regalar tu nombre completo y tu dirección de entrega, por favor?
+   [herramienta] buscarCliente {"telefono":"3205550101"} (devolvio error)
+   (http 200 3.142879s)
+
+USUARIO> Me llamo Andrés Salazar Ochoa y vivo en la Calle 10 # 43-12, Medellín.
+MERCABOT> ¡Listo, Andrés! Ya te registré correctamente. Ahora, ¿qué te gustaría pedir hoy? Puedo ayudarte a buscar productos o categorías.
+   [herramienta] registrarCliente {"direccion":"Calle 10 # 43-12, Medellín","nombre":"Andrés Salazar Ochoa","telefono":"3205550101"} 
+   (http 200 4.888381s)
+
+USUARIO> ¿Cuál es la capital de Francia?
+MERCABOT> Hola Andrés, solo puedo ayudarte con tus compras y pedidos en el supermercado. ¿Te gustaría que busquemos algún producto para tu pedido de hoy?
+   (http 200 2.456103s)

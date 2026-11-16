@@ -1,0 +1,9 @@
+# Fase 5 - Pruebas unitarias del chatbot (2026-11-16 01:59 -05)
+
+$ cd chatbot-client && ./mvnw test
+[INFO] Running com.udea.supermercado.chatbot.web.ChatControllerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 s -- in com.udea.supermercado.chatbot.web.ChatControllerTest
+[INFO] Running com.udea.supermercado.chatbot.config.HerramientaRegistradaTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.102 s -- in com.udea.supermercado.chatbot.config.HerramientaRegistradaTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
