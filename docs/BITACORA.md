@@ -335,3 +335,5 @@ Desde el Inspector se confirmó además el pedido 16, con el mismo efecto en la 
 - El Inspector cierra la conexión tras unos minutos de inactividad; basta volver a activar el interruptor.
 
 **Evidencias:** `f4-curl-initialize.txt`, `f4-curl-initialized.txt`, `f4-curl-tools-list.txt`, `f4-curl-tools-call.txt`, `f4-plan-pruebas.txt`, `f4-select-post-confirmar.txt`, `f4-inspector-conexion.png`, `f4-inspector-tools.png`, `f4-inspector-confirmar.png` (todas en `docs/evidencias/`).
+
+**Commit:** `95cf16c` en la rama `fase-4-verificacion-protocolo` (junto con `891404f`, los ajustes al chatbot)
