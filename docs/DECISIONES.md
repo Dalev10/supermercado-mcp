@@ -280,3 +280,71 @@ Cada decisión del proyecto queda aquí con sus opciones, la recomendación de C
 - **Decisión del estudiante:** b
 - **Justificación:** son rápidas, no dependen de la base de datos y cubren cada regla de negocio; es la opción que la guía aconseja con tiempo corto.
 - **Consecuencias:** 39 pruebas en `PedidoServiceTest` y `ClienteServiceTest`. Se eliminó la prueba `contextLoads` generada por Initializr porque exige la base de datos encendida. La integración real con MySQL se verifica a mano en la Fase 4. La prueba con Testcontainers queda como alcance pendiente.
+
+## Fase 5. Chatbot web
+
+Esta fase se ejecutó antes que la Fase 4 por la ruta crítica acordada en D0.5.
+
+### D5.1 Interfaz
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) HTML, CSS y JavaScript sin framework, servidos como recursos estáticos por Spring Boot; b) Thymeleaf; c) React con Vite
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** un solo proceso, sin toolchain de frontend, suficiente para un chat y fácil de explicar.
+- **Consecuencias:** `index.html`, `app.js` y `styles.css` en `chatbot-client/src/main/resources/static/`. Todo el texto se inserta con `textContent`, por lo que nunca se interpreta como HTML.
+
+### D5.2 Modelo concreto de Gemini
+- **Fecha:** 2026-11-15 (ajustada el 2026-11-16 tras la prueba real)
+- **Fase:** 5
+- **Opciones consideradas:** a) `gemini-3.8-flash`; b) `gemini-3.5-flash-lite`; c) `gemini-2.5-flash`, el del laboratorio
+- **Recomendación de Claude Code:** a, con b como alternativa si a fallaba. La recomendación de la guía (`gemini-2.5-flash`) cambió porque la documentación de Google, consultada el 2026-11-15, lo marca como deprecado: el acceso por API queda limitado a usuarios existentes y desde el 2026-12-01 las peticiones se redirigen a `gemini-3.5-flash-lite`.
+- **Decisión del estudiante:** a
+- **Modelo finalmente usado:** `gemini-3.5-flash-lite`
+- **Justificación:** se probó cada modelo con la clave del estudiante y una petición con llamada a herramienta. `gemini-3.8-flash` no respondió en dos intentos (40 s y 90 s de espera) y `gemini-3.6-flash` tardó 35 s; `gemini-3.5-flash-lite` respondió en algo más de 1 s y generó la llamada a la herramienta. Un chatbot que encadena varias llamadas por mensaje no es usable con el primero.
+- **Consecuencias:** el modelo va en configuración (`spring.ai.google.genai.chat.options.model`) y se puede cambiar sin tocar código con la variable `GEMINI_MODEL`. No se fijó temperatura: se usa la del modelo por defecto, con la que eligió bien las herramientas en todas las pruebas. El nivel gratuito tiene un límite de peticiones por minuto que se alcanza con pruebas muy seguidas (ver bitácora).
+
+### D5.3 Entrega de la respuesta
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) respuesta completa por `POST /api/chat`; b) streaming con SSE
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** simple y robusta; con herramientas de por medio el streaming complica el cliente.
+- **Consecuencias:** la página muestra un indicador "pensando" mientras llega la respuesta. El streaming queda como mejora pendiente.
+
+### D5.4 Memoria de conversación
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) en memoria, por identificador de conversación generado en el navegador; b) persistente en base de datos
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** el estado importante (el pedido) ya está en MySQL; basta recordar el hilo mientras la aplicación está encendida.
+- **Consecuencias:** se usa el `ChatMemory` en memoria que autoconfigura Spring AI, con `MessageChatMemoryAdvisor`. Al reiniciar el chatbot se pierde el hilo, pero no los pedidos. El botón "Nueva conversación" genera otro identificador.
+
+### D5.5 Visibilidad de las herramientas invocadas
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) mostrar bajo cada respuesta qué herramientas se llamaron y con qué argumentos; b) solo en los logs
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** hace visible el flujo MCP en la demostración y en las capturas del informe.
+- **Consecuencias:** clase `HerramientaRegistrada`, un decorador de `ToolCallback` que anota cada llamada (nombre, argumentos y si devolvió error). La respuesta de `/api/chat` incluye la lista `herramientas`.
+
+### D5.6 Identificación del cliente
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) el asistente pide el teléfono, usa `buscarCliente` y, si no existe, ofrece registrarlo; b) formulario de teléfono antes de chatear
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** todo ocurre conversando, que es el objetivo del ejercicio.
+- **Consecuencias:** el flujo está descrito en el prompt de sistema; se verificó con un teléfono no registrado (`docs/evidencias/f5-chat-cliente-nuevo.txt`).
+
+### D5.7 Nombre y tono del asistente
+- **Fecha:** 2026-11-15
+- **Fase:** 5
+- **Opciones consideradas:** a) "MercaBot", cordial y breve, con el prompt de sistema propuesto; b) otro nombre o cambios al prompt
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** nombre sencillo y tono adecuado para atención al cliente.
+- **Consecuencias:** el prompt de sistema está en `ChatConfig.PROMPT_SISTEMA`. Al texto aprobado se le añadió una regla ("Escribe en texto plano, sin Markdown; para las listas usa guiones") porque la página muestra el texto tal cual.

@@ -185,3 +185,62 @@ set -a && source ../.env && set +a
 **Evidencias:** `docs/evidencias/f3-arranque.txt`, `docs/evidencias/f3-pruebas.txt`, `docs/evidencias/f3-error-negocio.txt`
 
 **Commit:** `d2fe34b` en la rama `fase-3-servidor-mcp`
+
+## Fase 5. Chatbot web (2026-11-15 y 2026-11-16)
+
+Se ejecutó antes que la Fase 4 por la ruta crítica (D0.5).
+
+**Qué se hizo:**
+
+1. Se probaron los modelos de Gemini con la clave del estudiante antes de fijar uno (D5.2).
+2. `ChatConfig`: un `ChatClient` de Spring AI con el prompt de sistema, las herramientas que el cliente MCP descubre en el servidor y memoria de conversación.
+3. `HerramientaRegistrada`: decorador que anota cada herramienta invocada para mostrarla en la página.
+4. `ChatController`: `POST /api/chat` recibe `{conversacionId, mensaje}` y devuelve `{respuesta, herramientas}`; valida la entrada y traduce los fallos técnicos a mensajes amables.
+5. Página de chat estática: historial, campo de texto, indicador "pensando", botón de nueva conversación y lista de herramientas MCP usadas bajo cada respuesta.
+6. Seis pruebas unitarias del chatbot.
+
+**Por qué:**
+
+- El chatbot es el **host** MCP: contiene el modelo (Gemini) y un **cliente MCP** de Spring AI que, al arrancar, hace `initialize` y `tools/list` contra el servidor. No conoce las herramientas en tiempo de compilación: las descubre por el protocolo.
+- En cada mensaje, Gemini decide qué herramienta llamar y con qué argumentos; Spring AI ejecuta la llamada (`tools/call`) y le devuelve el resultado al modelo, que puede encadenar varias antes de responder.
+- El chatbot no tiene acceso a la base de datos ni reglas de negocio: todo pasa por el servidor MCP.
+
+**Comandos:**
+
+```bash
+# Con MySQL y mcp-server ya arriba
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+set -a && source .env && set +a
+cd chatbot-client && ./mvnw spring-boot:run
+# Abrir http://localhost:8080
+
+# La misma petición que envía la página
+curl -s -X POST http://localhost:8080/api/chat -H 'Content-Type: application/json' \
+  -d '{"conversacionId":"demo-1","mensaje":"Hola, quiero hacer un pedido. Mi teléfono es 3001234567."}'
+```
+
+**Resultado:**
+
+- El guion de aceptación de la guía funciona de extremo a extremo: identifica a la clienta por teléfono, lista los lácteos, crea el pedido 5 con 2 leches y una docena de huevos, quita los huevos, muestra el total ($14.600) y confirma en efectivo.
+- En MySQL el pedido 5 queda `CONFIRMADO` con una línea de 2 leches, y el stock de leche pasa de 40 a 34 tras tres pedidos de 2 unidades.
+- Teléfono no registrado: el asistente lo informa, pide nombre y dirección y registra al cliente 3.
+- Stock insuficiente: se agregan 5 cebollas habiendo 3, `confirmarPedido` falla, el asistente explica el motivo y propone ajustar a 3; tras el ajuste el pedido se confirma.
+- Tema ajeno al supermercado: el asistente se niega con cortesía.
+- Un mensaje vacío recibe HTTP 400 con "Escribe un mensaje."
+
+**Problemas y solución:**
+
+- **`gemini-3.8-flash` no respondió** con la clave del estudiante (dos intentos, 40 s y 90 s). Solución: usar `gemini-3.5-flash-lite`, que responde en poco más de 1 s, y dejar el modelo cambiable con la variable `GEMINI_MODEL`.
+- **Respuestas cortadas a mitad de frase.** Causa: Gemini puede repartir el texto en varias partes y Spring AI 1.1.8 crea una "generación" por parte; `ChatClient...call().content()` solo devuelve la primera. Solución: el controlador usa `chatResponse()` y une el texto de todas las generaciones.
+- **HTTP 503 cuando una herramienta devolvía un error de negocio** (por ejemplo, teléfono no registrado). Causa: el cliente MCP convierte el resultado con `isError=true` en una excepción cuyo mensaje es texto plano, y el conector de Gemini exige que el resultado de una herramienta sea JSON ("Failed to parse JSON"). Solución: `HerramientaRegistrada` captura la excepción y entrega al modelo un JSON `{"error": "mensaje del servidor"}`. Así el modelo lee el error y propone alternativas.
+- **Límite de peticiones del nivel gratuito (HTTP 429).** Al ejecutar varias conversaciones seguidas, un mensaje recibió "Se agotó por ahora la cuota gratuita de Gemini". El chatbot respondió con ese mensaje amable y la conversación siguió en el mensaje siguiente (`f5-chat-cuota-429.txt`). Para la corrida de evidencia se dejaron 20 s entre mensajes.
+- La prueba `contextLoads` generada por Initializr se eliminó porque necesita el servidor MCP encendido y la clave de Gemini.
+
+**Limitaciones conocidas:**
+
+- El servidor MCP debe estar arriba antes de arrancar el chatbot; si no, el chatbot no inicia. Si el servidor MCP se reinicia, hay que reiniciar también el chatbot, porque la sesión MCP deja de ser válida.
+- Si Gemini falla en mitad de una secuencia de herramientas, las ya ejecutadas no se deshacen (por ejemplo, un pedido creado en `BORRADOR`). El estado queda en MySQL y el asistente puede retomarlo.
+
+**Evidencias:** `f5-chat-pedido.txt`, `f5-chat-cliente-nuevo.txt`, `f5-chat-error-stock.txt`, `f5-chat-cuota-429.txt`, `f5-select-pedido.txt`, `f5-log-servidor.txt`, `f5-pruebas.txt` (todas en `docs/evidencias/`). Capturas pendientes del estudiante: `f5-chat-catalogo.png`, `f5-chat-pedido.png`, `f5-chat-error-stock.png`.
+
+**Commit:** `dbcfa26` en la rama `fase-5-chatbot`

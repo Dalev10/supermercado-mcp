@@ -1,0 +1,77 @@
+# Fase 5 - Pedido completo conversando: guion de aceptacion de la guia (2026-11-16 01:57 -05)
+# Peticiones POST /api/chat, las mismas que envia la pagina. Modelo: gemini-3.5-flash-lite.
+
+USUARIO> Hola, quiero hacer un pedido. Mi teléfono es 3001234567.
+MERCABOT> Hola Laura, es un gusto saludarte. Veo que tu dirección registrada es Calle 50 # 40-20, apto 301, Medellín. ¿Deseas usar esta misma dirección para este pedido o prefieres cambiarla? ¿Qué productos te gustaría agregar?
+   [herramienta] buscarCliente {"telefono":"3001234567"} 
+   (http 200 2.366286s)
+
+USUARIO> ¿Qué lácteos tienen?
+MERCABOT> Tenemos los siguientes lácteos y huevos disponibles:
+
+- Huevos AA (12 unidades): $9.600
+- Leche deslactosada (1 L): $5.600
+- Leche entera (1 L): $4.800
+- Queso campesino (500 g): $13.500
+- Yogur de fresa (1 L): $9.500
+
+¿Te gustaría agregar alguno a tu pedido?
+   [herramienta] listarCategorias {} 
+   [herramienta] buscarProductos {"soloDisponibles":true,"categoriaId":1} 
+   (http 200 2.994352s)
+
+USUARIO> Agrega 2 leches enteras y una docena de huevos.
+MERCABOT> He agregado a tu pedido 2 leches enteras y una docena de huevos AA. 
+
+Aquí tienes el resumen de tu pedido número 5:
+
+- Dirección de entrega: Calle 50 # 40-20, apto 301, Medellín
+- Productos:
+  - 2 x Leche entera (1 L): $9.600
+  - 1 x Huevos AA (12 unidades): $9.600
+- Subtotal: $19.200
+- Costo de envío: $5.000
+- Total: $24.200
+
+¿Deseas agregar algo más o confirmamos el pedido? Si estás lista, por favor indícame tu método de pago (efectivo, tarjeta o transferencia).
+   [herramienta] buscarCliente {"telefono":"3001234567"} 
+   [herramienta] buscarProductos {"texto":"leche entera"} 
+   [herramienta] buscarProductos {"texto":"huevos"} 
+   [herramienta] crearPedido {"direccionEntrega":"Calle 50 # 40-20, apto 301, Medellín","clienteId":1} 
+   [herramienta] agregarProductoAPedido {"pedidoId":5,"productoId":1,"cantidad":2} 
+   [herramienta] agregarProductoAPedido {"cantidad":1,"pedidoId":5,"productoId":6} 
+   (http 200 6.982770s)
+
+USUARIO> Quita los huevos y muéstrame el total.
+MERCABOT> He quitado los huevos de tu pedido número 5. 
+
+Este es el resumen actualizado:
+
+- Dirección de entrega: Calle 50 # 40-20, apto 301, Medellín
+- Productos:
+  - 2 x Leche entera (1 L): $9.600
+- Subtotal: $9.600
+- Costo de envío: $5.000
+- Total: $14.600
+
+¿Deseas agregar algo más o podemos confirmar el pedido? Por favor indícame tu método de pago (efectivo, tarjeta o transferencia).
+   [herramienta] buscarProductos {"texto":"huevos"} 
+   [herramienta] quitarProductoDePedido {"productoId":6,"pedidoId":5} 
+   (http 200 3.040966s)
+
+USUARIO> Confirma, pago en efectivo.
+MERCABOT> Tu pedido número 5 ha sido confirmado exitosamente.
+
+Resumen del pedido:
+- Estado: Confirmado
+- Dirección de entrega: Calle 50 # 40-20, apto 301, Medellín
+- Método de pago: Efectivo
+- Productos:
+  - 2 x Leche entera (1 L): $9.600
+- Subtotal: $9.600
+- Costo de envío: $5.000
+- Total a pagar: $14.600
+
+Pronto enviaremos tus productos. ¡Muchas gracias por tu compra!
+   [herramienta] confirmarPedido {"metodoPago":"EFECTIVO","pedidoId":5} 
+   (http 200 1.610344s)

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MercaBot · Pedidos a domicilio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="chat">
+    <header class="chat__cabecera">
+      <div>
+        <h1>MercaBot</h1>
+        <p>Asistente de pedidos a domicilio · Gemini + servidor MCP</p>
+      </div>
+      <button id="nueva" type="button">Nueva conversación</button>
+    </header>
+
+    <section id="mensajes" class="chat__mensajes" aria-live="polite" aria-label="Conversación"></section>
+
+    <form id="formulario" class="chat__entrada">
+      <label for="mensaje" class="oculto">Mensaje</label>
+      <textarea id="mensaje" rows="1" maxlength="1000" required
+                placeholder="Escribe tu mensaje, por ejemplo: quiero hacer un pedido"></textarea>
+      <button id="enviar" type="submit">Enviar</button>
+    </form>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

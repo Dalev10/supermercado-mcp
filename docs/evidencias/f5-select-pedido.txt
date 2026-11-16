@@ -1,0 +1,42 @@
+# Fase 5 - Estado de la base tras las conversaciones del chatbot (2026-11-16 01:59 -05)
+
+# Pedidos creados conversando (el 5 es el del guion de aceptacion, f5-chat-pedido.txt)
++----+-----------------------+------------+----------+-------------+----------+---------------+---------------------+---------------------+
+| id | cliente               | estado     | subtotal | costo_envio | total    | metodo_pago   | creado_en           | confirmado_en       |
++----+-----------------------+------------+----------+-------------+----------+---------------+---------------------+---------------------+
+|  1 | Laura Gómez Restrepo  | CONFIRMADO |  9600.00 |     5000.00 | 14600.00 | EFECTIVO      | 2026-11-16 01:51:56 | 2026-11-16 01:52:07 |
+|  2 | Carlos Pérez Mejía    | CONFIRMADO | 19600.00 |     5000.00 | 24600.00 | TARJETA       | 2026-11-16 01:53:20 | 2026-11-16 01:53:21 |
+|  3 | Laura Gómez Restrepo  | CONFIRMADO | 12600.00 |     5000.00 | 17600.00 | TRANSFERENCIA | 2026-11-16 01:54:54 | 2026-11-16 01:55:13 |
+|  4 | Laura Gómez Restrepo  | CONFIRMADO |  9600.00 |     5000.00 | 14600.00 | EFECTIVO      | 2026-11-16 01:56:00 | 2026-11-16 01:56:04 |
+|  5 | Laura Gómez Restrepo  | CONFIRMADO |  9600.00 |     5000.00 | 14600.00 | EFECTIVO      | 2026-11-16 01:58:17 | 2026-11-16 01:59:05 |
++----+-----------------------+------------+----------+-------------+----------+---------------+---------------------+---------------------+
+
+# Detalle de los pedidos (los huevos se agregaron y se quitaron: no quedan en el detalle)
++-----------+------------------+--------+----------+-----------------+----------+
+| pedido_id | producto         | unidad | cantidad | precio_unitario | subtotal |
++-----------+------------------+--------+----------+-----------------+----------+
+|         1 | Leche entera     | 1 L    |        2 |         4800.00 |  9600.00 |
+|         2 | Mantequilla      | 250 g  |        2 |         9800.00 | 19600.00 |
+|         3 | Cebolla cabezona | 1 kg   |        3 |         4200.00 | 12600.00 |
+|         4 | Leche entera     | 1 L    |        2 |         4800.00 |  9600.00 |
+|         5 | Leche entera     | 1 L    |        2 |         4800.00 |  9600.00 |
++-----------+------------------+--------+----------+-----------------+----------+
+
+# Stock tras confirmar. Inicial: Leche entera 40 (3 pedidos de 2 = 34), Mantequilla 2, Huevos AA 30, Cebolla cabezona 3
++----+------------------+-------------+-------+---------+
+| id | nombre           | unidad      | stock | version |
++----+------------------+-------------+-------+---------+
+|  1 | Leche entera     | 1 L         |    34 |       3 |
+|  5 | Mantequilla      | 250 g       |     0 |       1 |
+|  6 | Huevos AA        | 12 unidades |    30 |       0 |
+| 15 | Cebolla cabezona | 1 kg        |     0 |       1 |
++----+------------------+-------------+-------+---------+
+
+# Cliente 3: registrado desde el chat (f5-chat-cliente-nuevo.txt)
++----+-----------------------+------------+---------------------------------------+---------------------+
+| id | nombre                | telefono   | direccion                             | creado_en           |
++----+-----------------------+------------+---------------------------------------+---------------------+
+|  1 | Laura Gómez Restrepo  | 3001234567 | Calle 50 # 40-20, apto 301, Medellín  | 2026-11-15 22:41:37 |
+|  2 | Carlos Pérez Mejía    | 3109876543 | Carrera 70 # 30-15, Medellín          | 2026-11-15 22:41:37 |
+|  3 | Andrés Salazar Ochoa  | 3205550101 | Calle 10 # 43-12, Medellín            | 2026-11-16 01:54:49 |
++----+-----------------------+------------+---------------------------------------+---------------------+

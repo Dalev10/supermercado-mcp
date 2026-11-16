@@ -1,0 +1,25 @@
+# Fase 5 - Log del servidor MCP durante el pedido 5 (mcp-server/logs/supermercado-mcp.log)
+# Cada tools/call del chatbot aparece como una ejecucion de MethodToolCallback sobre el metodo @Tool.
+
+2026-11-16T01:57:51.482-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-10] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: listarCategorias
+2026-11-16T01:57:51.487-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-10] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: listarCategorias
+2026-11-16T01:57:52.610-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-1] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: buscarProductos
+2026-11-16T01:57:52.616-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-1] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: buscarProductos
+2026-11-16T01:58:15.652-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-2] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: buscarCliente
+2026-11-16T01:58:15.659-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-2] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: buscarCliente
+2026-11-16T01:58:16.491-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-3] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: buscarProductos
+2026-11-16T01:58:16.500-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-3] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: buscarProductos
+2026-11-16T01:58:16.508-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-4] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: buscarProductos
+2026-11-16T01:58:16.516-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-4] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: buscarProductos
+2026-11-16T01:58:17.227-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-5] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: crearPedido
+2026-11-16T01:58:17.241-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-5] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: crearPedido
+2026-11-16T01:58:18.429-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-6] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: agregarProductoAPedido
+2026-11-16T01:58:18.451-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-6] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: agregarProductoAPedido
+2026-11-16T01:58:18.458-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-7] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: agregarProductoAPedido
+2026-11-16T01:58:18.478-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-7] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: agregarProductoAPedido
+2026-11-16T01:58:42.070-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-8] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: buscarProductos
+2026-11-16T01:58:42.079-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-8] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: buscarProductos
+2026-11-16T01:58:42.994-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-9] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: quitarProductoDePedido
+2026-11-16T01:58:43.018-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-9] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: quitarProductoDePedido
+2026-11-16T01:59:04.581-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-10] o.s.ai.tool.method.MethodToolCallback    : Starting execution of tool: confirmarPedido
+2026-11-16T01:59:04.604-05:00 DEBUG 61536 [http-nio-127.0.0.1-8888-exec-10] o.s.ai.tool.method.MethodToolCallback    : Successful execution of tool: confirmarPedido

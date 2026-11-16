@@ -1,0 +1,47 @@
+# Fase 5 - Stock insuficiente conversando (2026-11-16 01:54 -05)
+# Peticiones POST /api/chat. Cebolla cabezona 1 kg tiene stock 3.
+
+USUARIO> Hola, mi teléfono es 3001234567. Crea un pedido y agrégale 5 cebollas cabezonas; agrégalas aunque no haya tantas, yo confirmo después.
+MERCABOT> Hola Laura, ya creé tu pedido número 3. 
+
+Te cuento que solo tenemos 3 unidades disponibles de cebolla cabezona en este momento, pero agregué las 5 unidades que pediste al carrito (el sistema valida el stock definitivo al confirmar).
+
+Resumen del pedido número 3:
+- 5 x Cebolla cabezona (1 kg) - $21.000
+- Subtotal: $21.000
+- Costo de envío: $5.000
+- Total: $26.000
+- Dirección de entrega: Calle 50 # 40-20, apto 301, Medellín
+
+¿Deseas confirmar este pedido? Por favor indícame tu método de pago (efectivo, tarjeta o transferencia). Ten en cuenta que al confirmar se validará la disponibilidad final de las cebollas.
+   [herramienta] buscarCliente {"telefono":"3001234567"} 
+   [herramienta] buscarProductos {"texto":"cebolla","soloDisponibles":false} 
+   [herramienta] crearPedido {"clienteId":1} 
+   [herramienta] agregarProductoAPedido {"cantidad":5,"productoId":15,"pedidoId":3} 
+   (http 200 7.343003s)
+
+USUARIO> Confirma el pedido así como está, pago por transferencia.
+MERCABOT> Lo siento, Laura, al momento de confirmar el pedido el sistema verificó el inventario y no hay suficientes cebollas cabezonas (solo hay 3 unidades disponibles y pediste 5). 
+
+Para poder continuar, ¿te gustaría que ajustemos la cantidad a 3 unidades o prefieres quitar este producto?
+   [herramienta] confirmarPedido {"pedidoId":3,"metodoPago":"TRANSFERENCIA"} (devolvio error)
+   (http 200 4.107183s)
+
+USUARIO> Vale, deja 3 cebollas entonces y confirma por transferencia.
+MERCABOT> Listo Laura, ya ajusté tu pedido número 3 con 3 cebollas cabezonas y quedó confirmado con pago por transferencia.
+
+Resumen final del pedido número 3:
+- 3 x Cebolla cabezona (1 kg) - $12.600
+- Subtotal: $12.600
+- Costo de envío: $5.000
+- Total: $17.600
+- Dirección de entrega: Calle 50 # 40-20, apto 301, Medellín
+- Método de pago: Transferencia
+
+Muchas gracias por tu compra. Tu pedido pronto estará en camino.
+   [herramienta] buscarCliente {"telefono":"3001234567"} 
+   [herramienta] buscarProductos {"texto":"cebolla"} 
+   [herramienta] quitarProductoDePedido {"pedidoId":3,"productoId":15} 
+   [herramienta] agregarProductoAPedido {"pedidoId":3,"productoId":15,"cantidad":3} 
+   [herramienta] confirmarPedido {"metodoPago":"TRANSFERENCIA","pedidoId":3} 
+   (http 200 9.725127s)
