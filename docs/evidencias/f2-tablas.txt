@@ -1,0 +1,80 @@
+# Fase 2 - Base de datos (2026-11-15 22:41 -05)
+
+$ docker compose ps
+NAME                 IMAGE       STATUS                    PORTS
+supermercado-mysql   mysql:8.4   Up 22 seconds (healthy)   127.0.0.1:3306->3306/tcp, 33060/tcp
+
+$ docker compose exec mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" supermercado_mcp -e "SHOW TABLES; SELECT COUNT(*) FROM producto;"'
++----------------------------+
+| Tables_in_supermercado_mcp |
++----------------------------+
+| categoria                  |
+| cliente                    |
+| detalle_pedido             |
+| pedido                     |
+| producto                   |
++----------------------------+
++----------+
+| COUNT(*) |
++----------+
+|       32 |
++----------+
+
+# Filas por tabla
++----------------+-------+
+| tabla          | filas |
++----------------+-------+
+| categoria      |     6 |
+| producto       |    32 |
+| cliente        |     2 |
+| pedido         |     0 |
+| detalle_pedido |     0 |
++----------------+-------+
+
+# Productos por categoria
++-------------------+-----------+----------+-----------+
+| categoria         | productos | agotados | inactivos |
++-------------------+-----------+----------+-----------+
+| Lácteos y huevos  |         6 |        0 |         0 |
+| Panadería         |         4 |        1 |         0 |
+| Frutas y verduras |         6 |        1 |         0 |
+| Carnes y pollo    |         4 |        0 |         0 |
+| Despensa          |         8 |        0 |         0 |
+| Bebidas           |         4 |        0 |         1 |
++-------------------+-----------+----------+-----------+
+
+# Productos con stock bajo, agotados o inactivos (para probar validaciones)
++----+---------------------+----------+---------+-------+--------+
+| id | nombre              | unidad   | precio  | stock | activo |
++----+---------------------+----------+---------+-------+--------+
+|  5 | Mantequilla         | 250 g    | 9800.00 |     2 |      1 |
+|  8 | Pan tajado integral | 450 g    | 7800.00 |     0 |      1 |
+| 15 | Cebolla cabezona    | 1 kg     | 4200.00 |     3 |      1 |
+| 16 | Aguacate hass       | 1 unidad | 3500.00 |     0 |      1 |
+| 31 | Gaseosa cola        | 1.5 L    | 6500.00 |     1 |      1 |
+| 32 | Chocolate de mesa   | 250 g    | 8900.00 |    10 |      0 |
++----+---------------------+----------+---------+-------+--------+
+
+# Clientes de prueba (ficticios)
++----+-----------------------+------------+---------------------------------------+---------------------+
+| id | nombre                | telefono   | direccion                             | creado_en           |
++----+-----------------------+------------+---------------------------------------+---------------------+
+|  1 | Laura Gómez Restrepo  | 3001234567 | Calle 50 # 40-20, apto 301, Medellín  | 2026-11-15 22:41:37 |
+|  2 | Carlos Pérez Mejía    | 3109876543 | Carrera 70 # 30-15, Medellín          | 2026-11-15 22:41:37 |
++----+-----------------------+------------+---------------------------------------+---------------------+
+
+# Usuario de aplicacion: permisos solo sobre su base
++--------------------+---------+--------------------+--------+---------------------+
+| usuario            | charset | collation          | zona   | ahora               |
++--------------------+---------+--------------------+--------+---------------------+
+| supermercado_app@% | utf8mb4 | utf8mb4_unicode_ci | SYSTEM | 2026-11-15 22:41:55 |
++--------------------+---------+--------------------+--------+---------------------+
++-------------------------------------------------------------------------+
+| Grants for supermercado_app@%                                           |
++-------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `supermercado_app`@`%`                            |
+| GRANT ALL PRIVILEGES ON `supermercado\_mcp`.* TO `supermercado_app`@`%` |
++-------------------------------------------------------------------------+
+
+# La restriccion CHECK impide un stock negativo
+ERROR 3819 (HY000) at line 1: Check constraint 'ck_producto_stock' is violated.

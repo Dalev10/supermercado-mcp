@@ -1,0 +1,26 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: supermercado-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: supermercado_mcp
+      # Usuario de la aplicacion: solo tiene permisos sobre supermercado_mcp
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: America/Bogota
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      # Solo accesible desde esta maquina
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Se ejecutan en orden alfabetico, solo cuando el volumen esta vacio
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # Por TCP (127.0.0.1) y no por socket: asi no se reporta "healthy" mientras corren los scripts de inicio
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      retries: 10
+volumes:
+  mysql_data:
