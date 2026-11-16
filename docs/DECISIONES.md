@@ -132,3 +132,12 @@ Cada decisión del proyecto queda aquí con sus opciones, la recomendación de C
 - **Decisión del estudiante:** a
 - **Justificación:** respaldo continuo, historial con fechas reales y el enlace queda listo aunque se acabe el tiempo.
 - **Consecuencias:** el estudiante creó el repositorio vacío en GitHub y entregó la URL SSH. Cada push se hace con su confirmación explícita.
+
+### D1.8 PDF del laboratorio en el repositorio público (no prevista en la guía)
+- **Fecha:** 2026-11-15
+- **Fase:** 1
+- **Opciones consideradas:** a) no subirlo y dejarlo en `.gitignore`; b) subirlo en `docs/referencia/` como indica la estructura de la guía
+- **Recomendación de Claude Code:** a
+- **Decisión del estudiante:** a
+- **Justificación:** es material del profesor con capturas de su equipo, y un archivo subido a un repositorio público no se puede retirar del todo. No hace falta redistribuirlo para entender el proyecto.
+- **Consecuencias:** `docs/referencia/` queda ignorado por git; el README cita el laboratorio y enlaza los repositorios públicos del profesor.
