@@ -1,0 +1,8 @@
+$ cd mcp-server && ./mvnw -q -DskipTests package
+exit=0
+65560359 target/mcp-server-0.0.1-SNAPSHOT.jar
+
+$ cd chatbot-client && ./mvnw -q -DskipTests package
+exit=0
+47890577 target/chatbot-client-0.0.1-SNAPSHOT.jar
+
